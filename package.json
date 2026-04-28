@@ -1,0 +1,14 @@
+{
+  "name": "roll-traceability-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Frontend dashboard untuk monitoring produksi jumbo roll, slit roll, quality check, dan traceability.",
+  "scripts": {
+    "start": "vite --host 127.0.0.1",
+    "dev": "vite --host 127.0.0.1",
+    "preview": "vite --host 127.0.0.1"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0"
+  }
+}
