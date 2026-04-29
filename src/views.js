@@ -1,6 +1,6 @@
 (function registerViews(window) {
-  const { products } = window.RollTraceData;
   const state = window.RollTraceState;
+  const productRepository = window.RollTraceRepositories.product;
   const { icon, productBadge, qcBadge, productFlowBadge, labelize, getProductionDate, parseDate, formatDateLabel, formatMonthYear, formatLastLocation } = window.RollTraceUi;
 
   const dashboardPageSize = 5;
@@ -15,10 +15,14 @@
     { key: "yearly", label: "Tahunan" },
   ];
 
+  function getProducts() {
+    return productRepository.getProducts();
+  }
+
   function filteredProducts({ includeSelectedPeriod = true } = {}) {
     const q = state.query.trim().toLowerCase();
 
-    return products.filter((product) => {
+    return getProducts().filter((product) => {
       const matchesType = state.type === "All" || product.type === state.type;
       const matchesPeriod = !includeSelectedPeriod || productMatchesSelectedPeriod(product);
       const matchesQuery = [product.batch, product.code, product.name, product.productionTime]
@@ -129,6 +133,7 @@
     const totalPages = Math.max(1, Math.ceil(orderedItems.length / dashboardPageSize));
     const currentPage = Math.min(state.dashboardPage, totalPages);
     const items = paginateItems(orderedItems, currentPage, dashboardPageSize);
+    const products = getProducts();
     const scopedProducts = state.selectedPeriod
       ? products.filter((product) => productMatchesSelectedPeriod(product))
       : products;
@@ -234,7 +239,7 @@
   function getProductionByPeriod(period) {
     const production = new Map();
 
-    products.forEach((product) => {
+    getProducts().forEach((product) => {
       const date = getProductionDate(product);
       const periodInfo = getPeriodInfo(date, period);
       const current = production.get(periodInfo.key) || {
@@ -498,7 +503,7 @@
   }
 
   function renderDetail() {
-    const product = products.find((item) => item.id === state.selectedProductId);
+    const product = productRepository.findById(state.selectedProductId);
     if (!product) return '<div class="empty-state">Produk tidak ditemukan.</div>';
     const lastLocation = formatLastLocation(product.location);
 
@@ -562,7 +567,7 @@
               ${product.timeline
                 .map((event) => {
                   const linkedProduct = event.relatedProductId
-                    ? products.find((item) => item.id === event.relatedProductId)
+                    ? productRepository.findById(event.relatedProductId)
                     : null;
 
                   return `
@@ -604,7 +609,7 @@
                         <div class="muted">${material.type} - ${material.batch} - ${material.quantity}</div>
                       </div>
                       ${
-                        products.some((item) => item.id === material.id)
+                        productRepository.exists(material.id)
                           ? `<button class="text-btn" data-product="${material.id}">Lihat detail</button>`
                           : `<button class="text-btn" data-material="${material.id}">Raw material</button>`
                       }
@@ -669,7 +674,7 @@
   function filteredReportProducts() {
     const q = state.reportQuery.trim().toLowerCase();
 
-    return products
+    return getProducts()
       .filter((product) =>
         [product.batch, product.code, product.name, product.type, product.location, product.materials.map((m) => m.batch).join(" ")]
           .join(" ")

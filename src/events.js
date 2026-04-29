@@ -1,7 +1,7 @@
 (function registerEvents(window, document) {
-  const { credentials, products } = window.RollTraceData;
   const state = window.RollTraceState;
   const views = window.RollTraceViews;
+  const { auth, product } = window.RollTraceRepositories;
   const { showModal, showLoadingModal, formatLastLocation } = window.RollTraceUi;
   const minimumLoadingDuration = 1000;
   let loadingTimer = null;
@@ -253,7 +253,7 @@
     if (!state.selectedReportProductId) return;
 
     const query = state.reportQuery.trim().toLowerCase();
-    const selectedProduct = products.find((product) => product.id === state.selectedReportProductId);
+    const selectedProduct = product.findById(state.selectedReportProductId);
     const matchesSearch = selectedProduct
       ? [selectedProduct.batch, selectedProduct.code, selectedProduct.name, selectedProduct.type, selectedProduct.location, selectedProduct.materials.map((m) => m.batch).join(" ")]
         .join(" ")
@@ -266,7 +266,7 @@
     }
   }
 
-  function handleLogin(event, render) {
+  async function handleLogin(event, render) {
     event.preventDefault();
 
     const form = new FormData(event.currentTarget);
@@ -295,23 +295,25 @@
 
     if (!valid) return;
 
-    if (username !== credentials.username || password !== credentials.password) {
+    const loginResult = await auth.login(username, password);
+
+    if (!loginResult) {
       passwordError.textContent = "Username atau password tidak sesuai.";
       return;
     }
 
     renderWithLoading(render, () => {
       state.loggedIn = true;
-      state.username = username;
+      state.username = loginResult.username || username;
       window.localStorage?.setItem("rollTraceLoggedIn", "true");
-      window.localStorage?.setItem("rollTraceUsername", username);
+      window.localStorage?.setItem("rollTraceUsername", state.username);
       state.selectedReportProductId = null;
     });
   }
 
   function exportCsv() {
     const header = ["Batch", "Kode Produk", "Nama Produk", "Tipe", "Jam Produksi", "QC", "Posisi Terakhir", "Material"];
-    const rows = products.map((product) => [
+    const rows = product.getProducts().map((product) => [
       product.batch,
       product.code,
       product.name,

@@ -1,4 +1,4 @@
-(function registerData(window) {
+(function registerMockData(window) {
   const credentials = {
     username: "admin",
     password: "admin123",
@@ -566,7 +566,7 @@
     },
   ];
 
-  window.RollTraceData = {
+  window.RollTraceMockData = {
     credentials,
     products,
   };

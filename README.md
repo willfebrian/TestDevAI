@@ -39,7 +39,13 @@ Demo login:
 ## Struktur source
 
 - `app.js`: entrypoint aplikasi dan fungsi render utama.
-- `src/data.js`: kredensial demo dan data produk.
+- `src/config.js`: konfigurasi sumber data aktif, saat ini `mock`.
+- `src/data-sources/mockData.js`: kredensial demo dan data produk untuk mode mock.
+- `src/data-sources/mockDataSource.js`: adapter data lokal dari `mockData.js`.
+- `src/data-sources/apiDataSource.js`: adapter contoh untuk mengambil data dari backend API.
+- `src/data-sources/apiDataSource.example.js`: contoh frontend API client yang masih full comment untuk referensi integrasi backend.
+- `src/repositories/productRepository.js`: pintu akses data produk untuk UI.
+- `src/repositories/authRepository.js`: pintu akses login untuk UI.
 - `src/state.js`: state aktif aplikasi.
 - `src/ui.js`: helper visual seperti icon, badge, dan label.
 - `src/views.js`: template/render untuk login, dashboard, roll production list, detail, dan report.
