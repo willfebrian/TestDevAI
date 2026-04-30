@@ -2,7 +2,7 @@
   const state = window.RollTraceState;
   const views = window.RollTraceViews;
   const { auth, product } = window.RollTraceRepositories;
-  const { showModal, showLoadingModal, formatLastLocation } = window.RollTraceUi;
+  const { showModal, showHtmlModal, showLoadingModal, formatLastLocation, escapeHtml, qcBadge } = window.RollTraceUi;
   const minimumLoadingDuration = 1000;
   let loadingTimer = null;
 
@@ -19,11 +19,14 @@
         state.selectedProductId = null;
         state.selectedPeriod = null;
         state.chartPeriod = "daily";
+        state.chartRangeStart = "";
+        state.chartRangeEnd = "";
         state.query = "";
         state.reportQuery = "";
         state.reportPage = 1;
         state.type = "All";
         state.dashboardPage = 1;
+        state.productionPage = 1;
         state.selectedReportProductId = null;
         state.navigationStack = [];
       });
@@ -40,6 +43,7 @@
           state.selectedProductId = null;
           state.navigationStack = [];
           state.dashboardPage = 1;
+          state.productionPage = 1;
           state.reportPage = 1;
           if (state.page === "production") {
             state.selectedPeriod = null;
@@ -51,13 +55,14 @@
     document.querySelectorAll("[data-view]").forEach((button) => {
       button.addEventListener("click", () => {
         state.view = button.dataset.view;
-        render();
+        renderPreservingScroll(render);
       });
     });
 
     document.querySelector("#searchInput")?.addEventListener("input", (event) => {
       state.query = event.target.value;
       state.dashboardPage = 1;
+      state.productionPage = 1;
       renderDashboardOnly(render);
     });
 
@@ -71,7 +76,8 @@
     document.querySelector("#typeFilter")?.addEventListener("change", (event) => {
       state.type = event.target.value;
       state.dashboardPage = 1;
-      render();
+      state.productionPage = 1;
+      renderPreservingScroll(render);
     });
 
     document.querySelectorAll("[data-chart-period]").forEach((button) => {
@@ -80,8 +86,32 @@
         state.selectedPeriod = null;
         state.selectedProductId = null;
         state.dashboardPage = 1;
-        render();
+        renderPreservingScroll(render);
       });
+    });
+
+    document.querySelector("#chartRangeForm")?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const startInput = document.querySelector("#chartRangeStart");
+      const endInput = document.querySelector("#chartRangeEnd");
+      const start = startInput?.value || "";
+      const end = endInput?.value || "";
+      const normalizedRange = normalizeDateRange(start, end);
+
+      state.chartRangeStart = normalizedRange.start;
+      state.chartRangeEnd = normalizedRange.end;
+      state.selectedPeriod = null;
+      state.selectedProductId = null;
+      state.dashboardPage = 1;
+      renderPreservingScroll(render);
+    });
+
+    document.querySelector("#clearChartRange")?.addEventListener("click", () => {
+      state.chartRangeStart = "";
+      state.chartRangeEnd = "";
+      state.selectedPeriod = null;
+      state.dashboardPage = 1;
+      renderPreservingScroll(render);
     });
 
     document.querySelectorAll("[data-production-key]").forEach((trigger) => {
@@ -94,7 +124,7 @@
         state.selectedPeriod = isSamePeriod ? null : { period, key, label };
         state.selectedProductId = null;
         state.dashboardPage = 1;
-        render();
+        renderPreservingScroll(render);
       };
 
       trigger.addEventListener("click", selectProductionPeriod);
@@ -109,7 +139,7 @@
     document.querySelector("#clearPeriodFilter")?.addEventListener("click", () => {
       state.selectedPeriod = null;
       state.dashboardPage = 1;
-      render();
+      renderPreservingScroll(render);
     });
 
     document.querySelectorAll("[data-dashboard-page]").forEach((button) => {
@@ -133,6 +163,16 @@
       });
     });
 
+    document.querySelectorAll("[data-production-page]").forEach((button) => {
+      button.addEventListener("click", () => {
+        if (button.disabled) return;
+
+        renderWithLoading(render, () => {
+          state.productionPage = Number(button.dataset.productionPage);
+        });
+      });
+    });
+
     document.querySelectorAll("[data-product]").forEach((item) => {
       item.addEventListener("click", (event) => {
         const id = event.currentTarget.dataset.product;
@@ -152,7 +192,7 @@
         if (!id) return;
 
         state.selectedReportProductId = state.selectedReportProductId === id ? null : id;
-        render();
+        renderPreservingScroll(render);
       });
     });
 
@@ -168,6 +208,13 @@
       });
     });
 
+    document.querySelectorAll("[data-qc-product]").forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.stopPropagation();
+        showFullQcModal(event.currentTarget.dataset.qcProduct);
+      });
+    });
+
     document.querySelector("#backBtn")?.addEventListener("click", () => {
       renderWithLoading(render, navigateBack);
     });
@@ -175,8 +222,12 @@
     document.querySelector("#exportBtn")?.addEventListener("click", exportCsv);
   }
 
-  function renderWithLoading(render, updateState) {
+  function renderWithLoading(render, updateState, options = {}) {
     if (loadingTimer) return;
+
+    const content = document.querySelector(".content");
+    const shouldPreserveScroll = options.preserveScroll !== false;
+    const scrollTop = shouldPreserveScroll ? content?.scrollTop || 0 : 0;
 
     updateState();
     const closeLoading = showLoadingModal();
@@ -185,7 +236,26 @@
       closeLoading();
       loadingTimer = null;
       render();
+      if (shouldPreserveScroll) {
+        document.querySelector(".content")?.scrollTo({ top: scrollTop });
+      }
     }, minimumLoadingDuration);
+  }
+
+  function renderPreservingScroll(render) {
+    const content = document.querySelector(".content");
+    const scrollTop = content?.scrollTop || 0;
+
+    render();
+    document.querySelector(".content")?.scrollTo({ top: scrollTop });
+  }
+
+  function normalizeDateRange(start, end) {
+    if (start && end && start > end) {
+      return { start: end, end: start };
+    }
+
+    return { start, end };
   }
 
   function getCurrentRoute() {
@@ -221,12 +291,14 @@
     const content = document.querySelector(".content");
 
     if (!content || state.page !== "dashboard" || state.selectedProductId) {
-      render();
+      renderPreservingScroll(render);
       return;
     }
 
+    const scrollTop = content.scrollTop;
     content.innerHTML = views.renderDashboard();
     bindEvents({ render });
+    content.scrollTo({ top: scrollTop });
 
     const input = document.querySelector("#searchInput");
     input?.focus();
@@ -237,12 +309,14 @@
     const content = document.querySelector(".content");
 
     if (!content || state.page !== "report" || state.selectedProductId) {
-      render();
+      renderPreservingScroll(render);
       return;
     }
 
+    const scrollTop = content.scrollTop;
     content.innerHTML = views.renderReport();
     bindEvents({ render });
+    content.scrollTo({ top: scrollTop });
 
     const input = document.querySelector("#reportSearchInput");
     input?.focus();
@@ -312,7 +386,7 @@
   }
 
   function exportCsv() {
-    const header = ["Batch", "Kode Produk", "Nama Produk", "Tipe", "Jam Produksi", "QC", "Posisi Terakhir", "Material"];
+    const header = ["Batch No.", "Product Code", "Product Name", "Product Type", "Production Time", "QC Result", "Current Location", "Material Source"];
     const rows = product.getProducts().map((product) => [
       product.batch,
       product.code,
@@ -337,9 +411,64 @@
 
     showModal({
       title: "Export Berhasil",
-      message: "Traceability report sudah dibuat dalam format CSV.",
-      actionLabel: "Tutup",
+      message: "Traceability Report has been generated in CSV format.",
+      actionLabel: "Close",
     });
+  }
+
+  function showFullQcModal(productId) {
+    const selectedProduct = product.findById(productId);
+    if (!selectedProduct) return;
+
+    const passCount = selectedProduct.qcDetails.filter((qc) => qc.result === "PASS").length;
+    const failCount = selectedProduct.qcDetails.filter((qc) => qc.result === "FAIL").length;
+    const content = `
+      <div class="qc-modal-subtitle">
+        <strong>${escapeHtml(selectedProduct.name)}</strong>
+        <span>Batch No. ${escapeHtml(selectedProduct.batch)} | ${escapeHtml(selectedProduct.code)}</span>
+      </div>
+      <div class="qc-summary-strip">
+        <div><span>Checked Items</span><strong>${selectedProduct.qcDetails.length}</strong></div>
+        <div><span>PASS</span><strong>${passCount}</strong></div>
+        <div><span>FAIL</span><strong>${failCount}</strong></div>
+        <div class="qc-result-summary"><span>QC Result</span><strong class="qc-result-text ${selectedProduct.qcStatus.toLowerCase()}">${escapeHtml(selectedProduct.qcStatus)}</strong></div>
+      </div>
+      <div class="qc-modal-grid">
+        ${selectedProduct.qcDetails.map(renderQcModalItem).join("")}
+      </div>
+    `;
+
+    showHtmlModal({
+      title: "QC Inspection Detail",
+      content,
+      actionLabel: "Close",
+      size: "wide-modal",
+      eyebrow: "QC Inspection",
+    });
+  }
+
+  function renderQcModalItem(qc) {
+    const isFail = qc.result === "FAIL";
+    const assessment = isFail
+      ? qc.reason || "QC item does not meet acceptance criteria."
+      : qc.assessment || "QC item is within acceptance criteria.";
+
+    return `
+      <article class="qc-modal-item ${isFail ? "fail" : "pass"}">
+        <div class="qc-modal-item-head">
+          <strong>${escapeHtml(qc.parameter)}</strong>
+          ${qcBadge(qc.result)}
+        </div>
+        <dl class="qc-modal-detail">
+          <div><dt>Actual</dt><dd>${escapeHtml(qc.value)}</dd></div>
+          <div><dt>Standard</dt><dd>${escapeHtml(qc.standard || "-")}</dd></div>
+          <div><dt>Method</dt><dd>${escapeHtml(qc.method || "-")}</dd></div>
+          <div><dt>Sample Point</dt><dd>${escapeHtml(qc.samplePoint || "-")}</dd></div>
+          <div class="wide"><dt>${isFail ? "Reason" : "Assessment"}</dt><dd>${escapeHtml(assessment)}</dd></div>
+          ${isFail && qc.action ? `<div class="wide"><dt>Action</dt><dd>${escapeHtml(qc.action)}</dd></div>` : ""}
+        </dl>
+      </article>
+    `;
   }
 
   window.RollTraceEvents = {

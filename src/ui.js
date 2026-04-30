@@ -13,24 +13,24 @@
 
   function productBadge(product) {
     const typeClass = product.type === "Jumbo Roll" ? "jumbo" : "slit";
-    return `<span class="pill ${typeClass}">${product.type}</span>`;
+    return `<span class="pill ${typeClass}"><span class="pill-text">${product.type}</span></span>`;
   }
 
   function qcBadge(status) {
-    return `<span class="pill ${status.toLowerCase()}">${status}</span>`;
+    return `<span class="pill ${status.toLowerCase()}"><span class="pill-text">${status}</span></span>`;
   }
 
   function getProductFlow(product) {
     const suffix = product.code.slice(-1).toUpperCase();
 
     return suffix === "I"
-      ? { label: "Input Slitting", className: "input" }
-      : { label: "Produk Final", className: "final" };
+      ? { label: "Slitting Input", className: "input" }
+      : { label: "Finish Good", className: "final" };
   }
 
   function productFlowBadge(product) {
     const flow = getProductFlow(product);
-    return `<span class="pill ${flow.className}">${flow.label}</span>`;
+    return `<span class="pill ${flow.className}"><span class="pill-text">${flow.label}</span></span>`;
   }
 
   function labelize(value) {
@@ -40,7 +40,7 @@
       thickness: "Ketebalan",
       weight: "Berat",
       core: "Core",
-      line: "Line Produksi",
+      line: "Production Line",
     };
 
     return labels[value] || value;
@@ -82,6 +82,14 @@
   }
 
   function showModal({ title, message, actionLabel = "Tutup" }) {
+    showHtmlModal({
+      title,
+      content: `<p class="modal-message">${escapeHtml(message)}</p>`,
+      actionLabel,
+    });
+  }
+
+  function showHtmlModal({ title, content, actionLabel = "Close", size = "", eyebrow = "Notification" }) {
     const document = window.document;
     const existingDialog = document.querySelector("#appModal");
 
@@ -89,17 +97,17 @@
 
     const dialog = document.createElement("dialog");
     dialog.id = "appModal";
-    dialog.className = "modal-dialog";
+    dialog.className = `modal-dialog ${size}`.trim();
     dialog.innerHTML = `
       <div class="modal-card">
         <div class="modal-head">
           <span class="modal-icon">i</span>
           <div>
-            <p class="eyebrow">Notification</p>
+            <p class="eyebrow">${escapeHtml(eyebrow)}</p>
             <h3>${escapeHtml(title)}</h3>
           </div>
         </div>
-        <p class="modal-message">${escapeHtml(message)}</p>
+        ${content}
         <div class="modal-actions">
           <button class="primary-btn" type="button" data-modal-close>${escapeHtml(actionLabel)}</button>
         </div>
@@ -177,7 +185,9 @@
     formatDateLabel,
     formatMonthYear,
     formatLastLocation,
+    escapeHtml,
     showModal,
+    showHtmlModal,
     showLoadingModal,
   };
 })(window);

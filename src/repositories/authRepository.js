@@ -14,8 +14,11 @@
     }
 
     const credentials = source.getCredentials();
-    return username === credentials.username && password === credentials.password
-      ? { username }
+    const users = Array.isArray(credentials) ? credentials : [credentials];
+    const matchedUser = users.find((user) => user.username === username && user.password === password);
+
+    return matchedUser
+      ? { username: matchedUser.username, name: matchedUser.name || matchedUser.username }
       : null;
   }
 

@@ -1,6 +1,6 @@
 # Product Intelligence Center Frontend
 
-Dashboard frontend bergaya executive untuk melihat informasi produk yang sudah diproduksi, quality check, serta traceability produk.
+Executive manufacturing frontend untuk melihat production output, QC result, dan traceability produk.
 
 ## Rekomendasi stack
 
@@ -14,22 +14,31 @@ Demo login:
 
 - Username: `admin`
 - Password: `admin123`
+- Username: `executive`
+- Password: `exec12345`
+- Username: `qa`
+- Password: `qa123456`
+- Username: `production`
+- Password: `prod12345`
+- Username: `warehouse`
+- Password: `wh123456`
 
 ## Fitur
 
 - Login page dengan validasi field, panjang password, dan kredensial.
-- Dashboard sebagai halaman awal dengan ringkasan produksi, chart, dan daftar maksimal 5 produk terakhir per page.
-- Roll Production List sebagai halaman list-only untuk Jumbo Roll dan Slit Roll yang terproduksi.
+- Mock data berisi 50 produk Jumbo Roll dan Slit Roll yang tersebar dari Januari sampai April 2026.
+- Production Dashboard sebagai halaman awal dengan production summary, chart, dan daftar maksimal 5 output terakhir per page.
+- Production Output List sebagai halaman list-only untuk Jumbo Roll dan Slit Roll yang terproduksi.
 - Kode produk mengikuti format 6 karakter: `JR`/`SR` + 3 kode alfanumerik + `I` untuk input slitting atau `O` untuk produk final.
 - Batch produk menggunakan 10 digit angka.
 - Jumbo Roll diset sebagai input slitting; Slit Roll dapat menjadi input slitting lanjutan jika kode berakhiran `I`, dan menjadi produk final jika berakhiran `O`.
-- Line chart produksi dengan pilihan periode harian, mingguan, bulanan, kuartal, semester, dan tahunan.
+- Line chart Production Trend dengan pilihan periode harian, mingguan, bulanan, kuartal, semester, dan tahunan.
 - Filter produk saat titik periode pada chart dipilih.
 - Toggle tampilan list atau card.
-- Detail produk berisi karakteristik, status QC, detail QC dengan hover assessment, histori posisi, dan material pembentuk.
-- Histori Jumbo Roll dapat menampilkan beberapa Slit Roll hasil slitting dari parent roll yang sama.
-- Traceability report dengan search bar dan traceability preview inline.
-- Traceability report dibatasi 10 produk per page.
+- Product Detail berisi product characteristics, QC detail dengan hover assessment, Movement History, dan Material Source.
+- Movement History pada Jumbo Roll dapat menampilkan beberapa Slit Roll hasil slitting dari parent roll yang sama.
+- Traceability Report dengan search bar dan traceability preview inline.
+- Traceability Report dibatasi 10 produk per page.
 - Session login tersimpan di browser agar refresh tidak logout.
 - Transisi antar halaman menampilkan loading modal minimal 1 detik.
 - Sidebar mengikuti tinggi jendela browser, logout berada di bagian bawah sidebar, dan konten page memakai scrollbar sendiri.

@@ -1,573 +1,242 @@
 (function registerMockData(window) {
-  const credentials = {
-    username: "admin",
-    password: "admin123",
-  };
-
-  const products = [
-    {
-      id: "JR-240428-001",
-      batch: "2026042801",
-      code: "JRPE1I",
-      name: "Jumbo Roll PE White 1200mm",
-      type: "Jumbo Roll",
-      productionTime: "2026-04-28 08:15",
-      location: "Terpakai untuk Slitting - Slitter Line 1",
-      qcStatus: "PASS",
-      source: ["RM-PE-8841", "RM-ADD-120"],
-      characteristics: {
-        width: "1200 mm",
-        length: "6,800 m",
-        thickness: "42 micron",
-        weight: "742 kg",
-        core: "6 inch",
-        line: "Extruder Line 2",
-      },
-      qcDetails: [
-        { parameter: "Thickness variance", value: "+/- 1.1 micron", result: "PASS", assessment: "Variasi ketebalan stabil dan berada dalam toleransi maksimum +/- 2 micron." },
-        { parameter: "Surface defect", value: "0 critical defect", result: "PASS", assessment: "Tidak ditemukan defect kritikal pada area sampling visual." },
-        { parameter: "Tensile strength", value: "38 MPa", result: "PASS", assessment: "Kekuatan tarik memenuhi minimum spesifikasi 35 MPa." },
-      ],
-      timeline: [
-        { time: "2026-04-28 06:50", place: "Material Staging", note: "Raw material ditimbang dan diverifikasi." },
-        { time: "2026-04-28 07:10", place: "Extruder Line 2", note: "Proses pembentukan jumbo roll dimulai." },
-        { time: "2026-04-28 08:15", place: "QC Inline", note: "Sampling karakteristik dan visual check." },
-        { time: "2026-04-28 09:05", place: "Warehouse A - Bay 04", note: "Produk masuk stok siap slitting." },
-        { time: "2026-04-28 09:20", place: "Warehouse A - Bay 04", note: "Jumbo roll keluar stok sebagai parent roll untuk slitting." },
-        {
-          time: "2026-04-28 09:45",
-          place: "Slitter Line 1",
-          note: "Digunakan untuk membentuk 2026042814 - Slit Roll PE White 300mm.",
-          relatedProductId: "SR-240428-014",
-          relatedProductLabel: "2026042814",
-        },
-        {
-          time: "2026-04-28 12:30",
-          place: "Slitter Line 1",
-          note: "Sisa jumbo roll digunakan kembali untuk membentuk 2026042815 - Slit Roll PE White 300mm.",
-          relatedProductId: "SR-240428-015",
-          relatedProductLabel: "2026042815",
-        },
-        {
-          time: "2026-04-28 13:30",
-          place: "Slitter Line 1",
-          note: "Sisa akhir jumbo roll digunakan untuk membentuk 2026042816 - Slit Roll PE White 300mm.",
-          relatedProductId: "SR-240428-016",
-          relatedProductLabel: "2026042816",
-        },
-      ],
-      materials: [
-        { id: "RM-PE-8841", type: "Raw Material", name: "Polyethylene Resin Grade A", batch: "9000008841", quantity: "720 kg" },
-        { id: "RM-ADD-120", type: "Raw Material", name: "Slip Additive Masterbatch", batch: "9000000120", quantity: "22 kg" },
-      ],
-    },
-    {
-      id: "SR-240428-014",
-      batch: "2026042814",
-      code: "SRPE1I",
-      name: "Slit Roll PE White 300mm",
-      type: "Slit Roll",
-      productionTime: "2026-04-28 10:40",
-      location: "Terpakai untuk Slitting - Slitter Line 3",
-      qcStatus: "PASS",
-      source: ["JR-240428-001"],
-      characteristics: {
-        width: "300 mm",
-        length: "6,750 m",
-        thickness: "42 micron",
-        weight: "184 kg",
-        core: "3 inch",
-        line: "Slitter Line 1",
-      },
-      qcDetails: [
-        { parameter: "Slit edge quality", value: "Clean edge", result: "PASS" },
-        { parameter: "Roll alignment", value: "1.5 mm offset", result: "PASS" },
-        { parameter: "Label verification", value: "Matched batch", result: "PASS" },
-      ],
-      timeline: [
-        { time: "2026-04-28 09:20", place: "Warehouse A - Bay 04", note: "Jumbo roll keluar stok untuk slitting." },
-        { time: "2026-04-28 09:45", place: "Slitter Line 1", note: "Slitting menjadi 4 turunan 300mm." },
-        { time: "2026-04-28 10:40", place: "QC Final", note: "QC dimensi, edge, dan label selesai." },
-        { time: "2026-04-28 11:05", place: "Packing Area - Pallet 18", note: "Produk menunggu proses slitting lanjutan." },
-        { time: "2026-04-28 11:30", place: "Slitter Line 3", note: "Slit roll keluar stok sebagai input slitting lanjutan." },
-        {
-          time: "2026-04-28 11:55",
-          place: "Slitter Line 3",
-          note: "Digunakan untuk membentuk 2026042817 - Slit Roll PE White 150mm.",
-          relatedProductId: "SR-240428-017",
-          relatedProductLabel: "2026042817",
-        },
-      ],
-      materials: [
-        { id: "JR-240428-001", type: "Jumbo Roll", name: "Jumbo Roll PE White 1200mm", batch: "2026042801", quantity: "1 parent roll" },
-      ],
-    },
-    {
-      id: "SR-240428-017",
-      batch: "2026042817",
-      code: "SRPE2O",
-      name: "Slit Roll PE White 150mm",
-      type: "Slit Roll",
-      productionTime: "2026-04-28 11:55",
-      location: "Packing Area - Pallet 21",
-      qcStatus: "PASS",
-      source: ["SR-240428-014"],
-      characteristics: {
-        width: "150 mm",
-        length: "6,680 m",
-        thickness: "42 micron",
-        weight: "91 kg",
-        core: "3 inch",
-        line: "Slitter Line 3",
-      },
-      qcDetails: [
-        { parameter: "Slit edge quality", value: "Clean edge", result: "PASS", assessment: "Edge hasil slitting lanjutan bersih tanpa burr atau tear." },
-        { parameter: "Roll alignment", value: "1.1 mm offset", result: "PASS", assessment: "Offset alignment berada di bawah batas maksimum 2 mm." },
-        { parameter: "Barcode scan", value: "Readable", result: "PASS", assessment: "Barcode terbaca dan terhubung ke batch input slit roll." },
-      ],
-      timeline: [
-        { time: "2026-04-28 11:30", place: "Packing Area - Pallet 18", note: "Slit roll input diterima di area slitter." },
-        { time: "2026-04-28 11:40", place: "Slitter Line 3", note: "Slitting lanjutan menjadi turunan 150mm." },
-        { time: "2026-04-28 11:55", place: "QC Final", note: "QC final lulus." },
-        { time: "2026-04-28 12:20", place: "Packing Area - Pallet 21", note: "Produk final menunggu wrapping." },
-      ],
-      materials: [
-        { id: "SR-240428-014", type: "Slit Roll", name: "Slit Roll PE White 300mm", batch: "2026042814", quantity: "1 input roll" },
-      ],
-    },
-    {
-      id: "SR-240428-015",
-      batch: "2026042815",
-      code: "SRPE1O",
-      name: "Slit Roll PE White 300mm",
-      type: "Slit Roll",
-      productionTime: "2026-04-28 12:30",
-      location: "Packing Area - Pallet 19",
-      qcStatus: "PASS",
-      source: ["JR-240428-001"],
-      characteristics: {
-        width: "300 mm",
-        length: "6,680 m",
-        thickness: "42 micron",
-        weight: "181 kg",
-        core: "3 inch",
-        line: "Slitter Line 1",
-      },
-      qcDetails: [
-        { parameter: "Slit edge quality", value: "Clean edge", result: "PASS", assessment: "Edge hasil slitting bersih tanpa burr atau wave." },
-        { parameter: "Roll alignment", value: "1.3 mm offset", result: "PASS", assessment: "Offset alignment berada di bawah batas maksimum 2 mm." },
-        { parameter: "Label verification", value: "Matched batch", result: "PASS", assessment: "Label batch sesuai dengan parent roll dan dokumen produksi." },
-      ],
-      timeline: [
-        { time: "2026-04-28 12:05", place: "Warehouse A - Bay 04", note: "Sisa parent roll diterima kembali di area slitter." },
-        { time: "2026-04-28 12:15", place: "Slitter Line 1", note: "Slitting lanjutan dari parent roll 2026042801." },
-        { time: "2026-04-28 12:30", place: "QC Final", note: "QC final lulus." },
-        { time: "2026-04-28 12:55", place: "Packing Area - Pallet 19", note: "Produk menunggu wrapping." },
-      ],
-      materials: [
-        { id: "JR-240428-001", type: "Jumbo Roll", name: "Jumbo Roll PE White 1200mm", batch: "2026042801", quantity: "remaining parent roll" },
-      ],
-    },
-    {
-      id: "SR-240428-016",
-      batch: "2026042816",
-      code: "SRPE1O",
-      name: "Slit Roll PE White 300mm",
-      type: "Slit Roll",
-      productionTime: "2026-04-28 13:30",
-      location: "Dispatch Lane 3",
-      qcStatus: "PASS",
-      source: ["JR-240428-001"],
-      characteristics: {
-        width: "300 mm",
-        length: "6,620 m",
-        thickness: "42 micron",
-        weight: "179 kg",
-        core: "3 inch",
-        line: "Slitter Line 1",
-      },
-      qcDetails: [
-        { parameter: "Slit edge quality", value: "Clean edge", result: "PASS", assessment: "Edge hasil slitting stabil dan tidak ditemukan tear." },
-        { parameter: "Winding tension", value: "Normal", result: "PASS", assessment: "Tegangan winding konsisten selama proses rewinding." },
-        { parameter: "Barcode scan", value: "Readable", result: "PASS", assessment: "Barcode terbaca dan terhubung ke batch parent roll." },
-      ],
-      timeline: [
-        { time: "2026-04-28 13:05", place: "Slitter Line 1", note: "Sisa akhir parent roll diproses untuk batch tambahan." },
-        { time: "2026-04-28 13:30", place: "QC Final", note: "QC final lulus." },
-        { time: "2026-04-28 14:10", place: "Dispatch Lane 3", note: "Produk siap loading." },
-      ],
-      materials: [
-        { id: "JR-240428-001", type: "Jumbo Roll", name: "Jumbo Roll PE White 1200mm", batch: "2026042801", quantity: "remaining parent roll" },
-      ],
-    },
-    {
-      id: "JR-240428-002",
-      batch: "2026042802",
-      code: "JRPETI",
-      name: "Jumbo Roll PET Clear 1000mm",
-      type: "Jumbo Roll",
-      productionTime: "2026-04-28 12:10",
-      location: "Hold Area - Rack 03",
-      qcStatus: "FAIL",
-      source: ["RM-PET-4390"],
-      characteristics: {
-        width: "1000 mm",
-        length: "5,200 m",
-        thickness: "36 micron",
-        weight: "588 kg",
-        core: "6 inch",
-        line: "Extruder Line 1",
-      },
-      qcDetails: [
-        { parameter: "Haze", value: "4.8%", result: "FAIL", reason: "Nilai haze melebihi batas maksimum 3.0%, sehingga clarity produk tidak memenuhi spesifikasi." },
-        { parameter: "Thickness variance", value: "+/- 2.7 micron", result: "FAIL", reason: "Variasi ketebalan melebihi toleransi maksimum +/- 2 micron." },
-        { parameter: "Surface defect", value: "2 streak marks", result: "FAIL", reason: "Ditemukan streak mark pada area sampling visual yang berpotensi mempengaruhi kualitas pelanggan." },
-      ],
-      timeline: [
-        { time: "2026-04-28 10:45", place: "Material Staging", note: "Raw material PET clear disiapkan." },
-        { time: "2026-04-28 11:10", place: "Extruder Line 1", note: "Proses pembentukan dimulai." },
-        { time: "2026-04-28 12:10", place: "QC Inline", note: "Ditemukan haze dan streak mark." },
-        { time: "2026-04-28 12:35", place: "Hold Area - Rack 03", note: "Produk ditahan menunggu keputusan QA." },
-      ],
-      materials: [
-        { id: "RM-PET-4390", type: "Raw Material", name: "PET Clear Resin", batch: "9000004390", quantity: "588 kg" },
-      ],
-    },
-    {
-      id: "SR-240428-027",
-      batch: "2026042827",
-      code: "SRPETO",
-      name: "Slit Roll PET Clear 250mm",
-      type: "Slit Roll",
-      productionTime: "2026-04-28 14:05",
-      location: "Dispatch Lane 2",
-      qcStatus: "PASS",
-      source: ["JR-240427-008"],
-      characteristics: {
-        width: "250 mm",
-        length: "4,960 m",
-        thickness: "35 micron",
-        weight: "126 kg",
-        core: "3 inch",
-        line: "Slitter Line 2",
-      },
-      qcDetails: [
-        { parameter: "Slit edge quality", value: "Clean edge", result: "PASS" },
-        { parameter: "Winding tension", value: "Normal", result: "PASS" },
-        { parameter: "Barcode scan", value: "Readable", result: "PASS" },
-      ],
-      timeline: [
-        { time: "2026-04-28 13:20", place: "Warehouse B - Bay 11", note: "Parent roll diterima di area slitter." },
-        { time: "2026-04-28 13:35", place: "Slitter Line 2", note: "Slitting menjadi 4 roll 250mm." },
-        { time: "2026-04-28 14:05", place: "QC Final", note: "QC final lulus." },
-        { time: "2026-04-28 15:00", place: "Dispatch Lane 2", note: "Siap untuk loading." },
-      ],
-      materials: [
-        { id: "JR-240427-008", type: "Jumbo Roll", name: "Jumbo Roll PET Clear 1000mm", batch: "2026042708", quantity: "1 parent roll" },
-      ],
-    },
-    {
-      id: "JR-240427-008",
-      batch: "2026042708",
-      code: "JRPETI",
-      name: "Jumbo Roll PET Clear 1000mm",
-      type: "Jumbo Roll",
-      productionTime: "2026-04-27 16:25",
-      location: "Terpakai untuk Slitting - Slitter Line 2",
-      qcStatus: "PASS",
-      source: ["RM-PET-4312"],
-      characteristics: {
-        width: "1000 mm",
-        length: "5,050 m",
-        thickness: "35 micron",
-        weight: "510 kg",
-        core: "6 inch",
-        line: "Extruder Line 1",
-      },
-      qcDetails: [
-        { parameter: "Haze", value: "2.1%", result: "PASS" },
-        { parameter: "Thickness variance", value: "+/- 1.4 micron", result: "PASS" },
-        { parameter: "Surface defect", value: "0 critical defect", result: "PASS" },
-      ],
-      timeline: [
-        { time: "2026-04-27 14:40", place: "Material Staging", note: "Material PET clear diverifikasi." },
-        { time: "2026-04-27 15:05", place: "Extruder Line 1", note: "Proses produksi jumbo roll dimulai." },
-        { time: "2026-04-27 16:25", place: "QC Inline", note: "Parameter visual dan dimensi sesuai spesifikasi." },
-        { time: "2026-04-27 17:00", place: "Warehouse B - Bay 11", note: "Produk masuk stok untuk slitting berikutnya." },
-        { time: "2026-04-28 13:20", place: "Warehouse B - Bay 11", note: "Jumbo roll keluar stok sebagai parent roll untuk slitting." },
-        {
-          time: "2026-04-28 13:35",
-          place: "Slitter Line 2",
-          note: "Digunakan untuk membentuk 2026042827 - Slit Roll PET Clear 250mm.",
-          relatedProductId: "SR-240428-027",
-          relatedProductLabel: "2026042827",
-        },
-      ],
-      materials: [
-        { id: "RM-PET-4312", type: "Raw Material", name: "PET Clear Resin", batch: "9000004312", quantity: "510 kg" },
-      ],
-    },
-    {
-      id: "SR-240427-019",
-      batch: "2026042719",
-      code: "SRPE4O",
-      name: "Slit Roll PE White 400mm",
-      type: "Slit Roll",
-      productionTime: "2026-04-27 11:35",
-      location: "Packing Area - Pallet 09",
-      qcStatus: "PASS",
-      source: ["JR-240424-002"],
-      characteristics: {
-        width: "400 mm",
-        length: "6,100 m",
-        thickness: "42 micron",
-        weight: "240 kg",
-        core: "3 inch",
-        line: "Slitter Line 1",
-      },
-      qcDetails: [
-        { parameter: "Slit edge quality", value: "Clean edge", result: "PASS" },
-        { parameter: "Roll alignment", value: "1.2 mm offset", result: "PASS" },
-        { parameter: "Barcode scan", value: "Readable", result: "PASS" },
-      ],
-      timeline: [
-        { time: "2026-04-27 10:40", place: "Warehouse A - Bay 02", note: "Parent roll dipindahkan ke area slitter." },
-        { time: "2026-04-27 11:00", place: "Slitter Line 1", note: "Slitting menjadi 3 roll 400mm." },
-        { time: "2026-04-27 11:35", place: "QC Final", note: "QC final lulus." },
-        { time: "2026-04-27 12:10", place: "Packing Area - Pallet 09", note: "Produk menunggu wrapping." },
-      ],
-      materials: [
-        { id: "JR-240424-002", type: "Jumbo Roll", name: "Jumbo Roll PE White 1200mm", batch: "2026042402", quantity: "1 parent roll" },
-      ],
-    },
-    {
-      id: "JR-240426-006",
-      batch: "2026042606",
-      code: "JRPEBI",
-      name: "Jumbo Roll PE Blue 900mm",
-      type: "Jumbo Roll",
-      productionTime: "2026-04-26 09:50",
-      location: "Terpakai untuk Slitting - Slitter Line 2",
-      qcStatus: "PASS",
-      source: ["RM-PE-8720", "RM-PIG-212"],
-      characteristics: {
-        width: "900 mm",
-        length: "6,300 m",
-        thickness: "40 micron",
-        weight: "565 kg",
-        core: "6 inch",
-        line: "Extruder Line 2",
-      },
-      qcDetails: [
-        { parameter: "Color consistency", value: "Delta E 0.8", result: "PASS" },
-        { parameter: "Thickness variance", value: "+/- 1.2 micron", result: "PASS" },
-        { parameter: "Tensile strength", value: "36 MPa", result: "PASS" },
-      ],
-      timeline: [
-        { time: "2026-04-26 08:20", place: "Material Staging", note: "PE resin dan pigment disiapkan." },
-        { time: "2026-04-26 08:45", place: "Extruder Line 2", note: "Proses pembentukan jumbo roll dimulai." },
-        { time: "2026-04-26 09:50", place: "QC Inline", note: "Sampling warna dan ketebalan selesai." },
-        { time: "2026-04-26 10:30", place: "Warehouse A - Bay 07", note: "Produk masuk stok." },
-        { time: "2026-04-26 12:20", place: "Warehouse A - Bay 07", note: "Jumbo roll keluar stok sebagai parent roll untuk slitting." },
-        {
-          time: "2026-04-26 12:45",
-          place: "Slitter Line 2",
-          note: "Digunakan untuk membentuk 2026042611 - Slit Roll PE Blue 300mm.",
-          relatedProductId: "SR-240426-011",
-          relatedProductLabel: "2026042611",
-        },
-      ],
-      materials: [
-        { id: "RM-PE-8720", type: "Raw Material", name: "Polyethylene Resin Grade B", batch: "9000008720", quantity: "548 kg" },
-        { id: "RM-PIG-212", type: "Raw Material", name: "Blue Pigment Masterbatch", batch: "9000000212", quantity: "17 kg" },
-      ],
-    },
-    {
-      id: "SR-240426-011",
-      batch: "2026042611",
-      code: "SRPEBO",
-      name: "Slit Roll PE Blue 300mm",
-      type: "Slit Roll",
-      productionTime: "2026-04-26 13:15",
-      location: "Dispatch Lane 1",
-      qcStatus: "PASS",
-      source: ["JR-240426-006"],
-      characteristics: {
-        width: "300 mm",
-        length: "6,250 m",
-        thickness: "40 micron",
-        weight: "185 kg",
-        core: "3 inch",
-        line: "Slitter Line 2",
-      },
-      qcDetails: [
-        { parameter: "Slit edge quality", value: "Clean edge", result: "PASS" },
-        { parameter: "Winding tension", value: "Normal", result: "PASS" },
-        { parameter: "Label verification", value: "Matched batch", result: "PASS" },
-      ],
-      timeline: [
-        { time: "2026-04-26 12:20", place: "Warehouse A - Bay 07", note: "Jumbo roll keluar stok untuk slitting." },
-        { time: "2026-04-26 12:45", place: "Slitter Line 2", note: "Slitting menjadi 3 roll 300mm." },
-        { time: "2026-04-26 13:15", place: "QC Final", note: "QC final lulus." },
-        { time: "2026-04-26 14:00", place: "Dispatch Lane 1", note: "Produk siap kirim." },
-      ],
-      materials: [
-        { id: "JR-240426-006", type: "Jumbo Roll", name: "Jumbo Roll PE Blue 900mm", batch: "2026042606", quantity: "1 parent roll" },
-      ],
-    },
-    {
-      id: "JR-240425-003",
-      batch: "2026042503",
-      code: "JRBOPI",
-      name: "Jumbo Roll BOPP Clear 1100mm",
-      type: "Jumbo Roll",
-      productionTime: "2026-04-25 07:55",
-      location: "Hold Area - Rack 01",
-      qcStatus: "FAIL",
-      source: ["RM-BOPP-1180"],
-      characteristics: {
-        width: "1100 mm",
-        length: "7,200 m",
-        thickness: "28 micron",
-        weight: "492 kg",
-        core: "6 inch",
-        line: "Extruder Line 3",
-      },
-      qcDetails: [
-        { parameter: "Gauge band", value: "Visible banding", result: "FAIL", reason: "Gauge band terlihat jelas dan mengindikasikan profil ketebalan tidak stabil." },
-        { parameter: "Thickness variance", value: "+/- 3.1 micron", result: "FAIL", reason: "Variasi ketebalan melewati toleransi proses untuk BOPP clear." },
-        { parameter: "Surface defect", value: "1 wrinkle zone", result: "FAIL", reason: "Wrinkle zone ditemukan pada permukaan roll dan perlu keputusan disposition QA." },
-      ],
-      timeline: [
-        { time: "2026-04-25 06:30", place: "Material Staging", note: "Material BOPP clear disiapkan." },
-        { time: "2026-04-25 07:05", place: "Extruder Line 3", note: "Produksi dimulai." },
-        { time: "2026-04-25 07:55", place: "QC Inline", note: "Ditemukan gauge band dan wrinkle." },
-        { time: "2026-04-25 08:20", place: "Hold Area - Rack 01", note: "Produk ditahan untuk evaluasi QA." },
-      ],
-      materials: [
-        { id: "RM-BOPP-1180", type: "Raw Material", name: "BOPP Clear Resin", batch: "9000001180", quantity: "492 kg" },
-      ],
-    },
-    {
-      id: "JR-240425-001",
-      batch: "2026042501",
-      code: "JRPETI",
-      name: "Jumbo Roll PET Clear 1000mm",
-      type: "Jumbo Roll",
-      productionTime: "2026-04-25 10:20",
-      location: "Terpakai untuk Slitting - Slitter Line 3",
-      qcStatus: "PASS",
-      source: ["RM-PET-4251"],
-      characteristics: {
-        width: "1000 mm",
-        length: "4,900 m",
-        thickness: "35 micron",
-        weight: "506 kg",
-        core: "6 inch",
-        line: "Extruder Line 1",
-      },
-      qcDetails: [
-        { parameter: "Haze", value: "2.4%", result: "PASS", assessment: "Nilai haze masih berada di bawah batas maksimum 3.0%." },
-        { parameter: "Thickness variance", value: "+/- 1.5 micron", result: "PASS", assessment: "Variasi ketebalan berada dalam toleransi maksimum +/- 2 micron." },
-        { parameter: "Surface defect", value: "0 critical defect", result: "PASS", assessment: "Tidak ditemukan defect kritikal pada area sampling visual." },
-      ],
-      timeline: [
-        { time: "2026-04-25 08:55", place: "Material Staging", note: "Material PET clear diverifikasi untuk proses extruder." },
-        { time: "2026-04-25 09:20", place: "Extruder Line 1", note: "Proses produksi jumbo roll dimulai." },
-        { time: "2026-04-25 10:20", place: "QC Inline", note: "Sampling visual dan dimensi sesuai spesifikasi." },
-        { time: "2026-04-25 10:55", place: "Warehouse B - Bay 04", note: "Produk masuk stok untuk kebutuhan slitting." },
-        { time: "2026-04-25 14:25", place: "Warehouse B - Bay 04", note: "Jumbo roll keluar stok sebagai parent roll untuk slitting." },
-        {
-          time: "2026-04-25 14:55",
-          place: "Slitter Line 3",
-          note: "Digunakan untuk membentuk 2026042508 - Slit Roll PET Clear 500mm.",
-          relatedProductId: "SR-240425-008",
-          relatedProductLabel: "2026042508",
-        },
-      ],
-      materials: [
-        { id: "RM-PET-4251", type: "Raw Material", name: "PET Clear Resin", batch: "9000004251", quantity: "506 kg" },
-      ],
-    },
-    {
-      id: "SR-240425-008",
-      batch: "2026042508",
-      code: "SRPT2O",
-      name: "Slit Roll PET Clear 500mm",
-      type: "Slit Roll",
-      productionTime: "2026-04-25 15:30",
-      location: "Warehouse C - Bay 05",
-      qcStatus: "PASS",
-      source: ["JR-240425-001"],
-      characteristics: {
-        width: "500 mm",
-        length: "4,800 m",
-        thickness: "35 micron",
-        weight: "252 kg",
-        core: "3 inch",
-        line: "Slitter Line 3",
-      },
-      qcDetails: [
-        { parameter: "Slit edge quality", value: "Clean edge", result: "PASS" },
-        { parameter: "Roll alignment", value: "1.8 mm offset", result: "PASS" },
-        { parameter: "Label verification", value: "Matched batch", result: "PASS" },
-      ],
-      timeline: [
-        { time: "2026-04-25 14:25", place: "Warehouse B - Bay 04", note: "Parent roll diterima di slitter." },
-        { time: "2026-04-25 14:55", place: "Slitter Line 3", note: "Slitting menjadi 2 roll 500mm." },
-        { time: "2026-04-25 15:30", place: "QC Final", note: "QC final lulus." },
-        { time: "2026-04-25 16:10", place: "Warehouse C - Bay 05", note: "Produk masuk stok finish good." },
-      ],
-      materials: [
-        { id: "JR-240425-001", type: "Jumbo Roll", name: "Jumbo Roll PET Clear 1000mm", batch: "2026042501", quantity: "1 parent roll" },
-      ],
-    },
-    {
-      id: "JR-240424-002",
-      batch: "2026042402",
-      code: "JRPE1I",
-      name: "Jumbo Roll PE White 1200mm",
-      type: "Jumbo Roll",
-      productionTime: "2026-04-24 08:35",
-      location: "Terpakai untuk Slitting - Slitter Line 1",
-      qcStatus: "PASS",
-      source: ["RM-PE-8662", "RM-ADD-118"],
-      characteristics: {
-        width: "1200 mm",
-        length: "6,600 m",
-        thickness: "42 micron",
-        weight: "721 kg",
-        core: "6 inch",
-        line: "Extruder Line 2",
-      },
-      qcDetails: [
-        { parameter: "Thickness variance", value: "+/- 1.3 micron", result: "PASS" },
-        { parameter: "Surface defect", value: "0 critical defect", result: "PASS" },
-        { parameter: "Tensile strength", value: "37 MPa", result: "PASS" },
-      ],
-      timeline: [
-        { time: "2026-04-24 07:10", place: "Material Staging", note: "Raw material disiapkan dan ditimbang." },
-        { time: "2026-04-24 07:40", place: "Extruder Line 2", note: "Produksi jumbo roll dimulai." },
-        { time: "2026-04-24 08:35", place: "QC Inline", note: "Sampling QC sesuai spesifikasi." },
-        { time: "2026-04-24 09:15", place: "Warehouse A - Bay 01", note: "Produk masuk stok." },
-        { time: "2026-04-27 10:40", place: "Warehouse A - Bay 01", note: "Jumbo roll keluar stok sebagai parent roll untuk slitting." },
-        {
-          time: "2026-04-27 11:00",
-          place: "Slitter Line 1",
-          note: "Digunakan untuk membentuk 2026042719 - Slit Roll PE White 400mm.",
-          relatedProductId: "SR-240427-019",
-          relatedProductLabel: "2026042719",
-        },
-      ],
-      materials: [
-        { id: "RM-PE-8662", type: "Raw Material", name: "Polyethylene Resin Grade A", batch: "9000008662", quantity: "700 kg" },
-        { id: "RM-ADD-118", type: "Raw Material", name: "Slip Additive Masterbatch", batch: "9000000118", quantity: "21 kg" },
-      ],
-    },
+  const users = [
+    { username: "admin", password: "admin123", name: "Admin" },
+    { username: "executive", password: "exec12345", name: "Executive User" },
+    { username: "qa", password: "qa123456", name: "Quality Assurance" },
+    { username: "production", password: "prod12345", name: "Production Lead" },
+    { username: "warehouse", password: "wh123456", name: "Warehouse User" },
   ];
 
+  const productFamilies = [
+    { key: "PE1", material: "PE White", jumboWidth: 1200, slitWidths: [300, 400, 150], thickness: 42, raw: "Polyethylene Resin Grade A" },
+    { key: "PET", material: "PET Clear", jumboWidth: 1000, slitWidths: [250, 500, 125], thickness: 35, raw: "PET Clear Resin" },
+    { key: "PEB", material: "PE Blue", jumboWidth: 900, slitWidths: [300, 450, 150], thickness: 40, raw: "Polyethylene Resin Grade B" },
+    { key: "BOP", material: "BOPP Clear", jumboWidth: 1100, slitWidths: [275, 550, 137], thickness: 28, raw: "BOPP Clear Resin" },
+  ];
+
+  const productionDates = [
+    "2026-01-06", "2026-01-10", "2026-01-16", "2026-01-24", "2026-01-30",
+    "2026-02-04", "2026-02-09", "2026-02-14", "2026-02-20", "2026-02-27",
+    "2026-03-03", "2026-03-08", "2026-03-15", "2026-03-21", "2026-03-29",
+    "2026-04-04", "2026-04-10", "2026-04-16", "2026-04-22", "2026-04-28",
+  ];
+
+  const products = buildProducts();
+
+  function buildProducts() {
+    const items = [];
+    let slitSequence = 1;
+
+    productionDates.forEach((date, index) => {
+      const family = productFamilies[index % productFamilies.length];
+      const jumboSequence = index + 1;
+      const jumboBatch = createBatch(date, jumboSequence);
+      const jumboId = createId("JR", date, jumboSequence);
+      const hasHoldStatus = [4, 9, 14].includes(jumboSequence);
+      const jumbo = createJumboRoll({
+        id: jumboId,
+        batch: jumboBatch,
+        sequence: jumboSequence,
+        family,
+        date,
+        hasHoldStatus,
+      });
+
+      items.push(jumbo);
+
+      const slitCount = index < 10 ? 2 : 1;
+      let currentParent = jumbo;
+
+      for (let slitIndex = 0; slitIndex < slitCount; slitIndex += 1) {
+        const isIntermediate = slitIndex === 0 && index % 5 === 0 && slitCount > 1;
+        const sourceProduct = currentParent;
+        const slitDate = addHours(date, 5 + slitIndex * 3);
+        const slitBatch = createBatch(date, 40 + slitSequence);
+        const slitId = createId("SR", date, 40 + slitSequence);
+        const slit = createSlitRoll({
+          id: slitId,
+          batch: slitBatch,
+          sequence: slitSequence,
+          family,
+          date,
+          sourceProduct,
+          width: family.slitWidths[slitIndex % family.slitWidths.length],
+          productionTime: slitDate,
+          isIntermediate,
+          hasFailStatus: [7, 18, 26].includes(slitSequence),
+        });
+
+        sourceProduct.timeline.push({
+          time: slit.productionTime,
+          place: `Slitter Line ${(slitSequence % 3) + 1}`,
+          note: `Digunakan untuk membentuk ${slit.batch} - ${slit.name}.`,
+          relatedProductId: slit.id,
+          relatedProductLabel: slit.batch,
+        });
+
+        if (sourceProduct.type === "Jumbo Roll") {
+          sourceProduct.location = `Terpakai untuk Slitting - Slitter Line ${(slitSequence % 3) + 1}`;
+        } else {
+          sourceProduct.location = `Terpakai untuk Slitting - Slitter Line ${(slitSequence % 3) + 1}`;
+        }
+
+        items.push(slit);
+        currentParent = isIntermediate ? slit : jumbo;
+        slitSequence += 1;
+      }
+    });
+
+    return items.sort((a, b) => b.productionTime.localeCompare(a.productionTime));
+  }
+
+  function createJumboRoll({ id, batch, sequence, family, date, hasHoldStatus }) {
+    const productionTime = `${date} ${String(7 + (sequence % 4)).padStart(2, "0")}:15`;
+    const qcStatus = hasHoldStatus ? "FAIL" : "PASS";
+
+    return {
+      id,
+      batch,
+      code: `JR${family.key}I`,
+      name: `Jumbo Roll ${family.material} ${family.jumboWidth}mm`,
+      type: "Jumbo Roll",
+      productionTime,
+      location: hasHoldStatus ? `Hold Area - Rack ${String((sequence % 5) + 1).padStart(2, "0")}` : `Warehouse ${sequence % 2 ? "A" : "B"} - Bay ${String((sequence % 12) + 1).padStart(2, "0")}`,
+      qcStatus,
+      source: [`RM-${family.key}-${8000 + sequence}`, `RM-ADD-${100 + sequence}`],
+      characteristics: {
+        width: `${family.jumboWidth} mm`,
+        length: `${6200 + sequence * 35} m`,
+        thickness: `${family.thickness} micron`,
+        weight: `${520 + sequence * 9} kg`,
+        core: "6 inch",
+        line: `Extruder Line ${(sequence % 3) + 1}`,
+      },
+      qcDetails: createQcDetails(qcStatus, "jumbo", family),
+      timeline: [
+        { time: `${date} 06:45`, place: "Material Staging", note: "Raw material ditimbang dan diverifikasi." },
+        { time: `${date} 07:20`, place: `Extruder Line ${(sequence % 3) + 1}`, note: "Proses pembentukan jumbo roll dimulai." },
+        { time: productionTime, place: "QC Inline", note: qcStatus === "PASS" ? "Sampling karakteristik dan visual check lulus." : "Produk ditahan karena parameter QC tidak memenuhi spesifikasi." },
+        { time: `${date} ${String(10 + (sequence % 5)).padStart(2, "0")}:05`, place: qcStatus === "PASS" ? "Warehouse Staging" : "Hold Area", note: qcStatus === "PASS" ? "Produk masuk stok siap slitting." : "Produk menunggu keputusan QA." },
+      ],
+      materials: [
+        { id: `RM-${family.key}-${8000 + sequence}`, type: "Raw Material", name: family.raw, batch: `90000${String(8000 + sequence).padStart(5, "0")}`, quantity: `${500 + sequence * 8} kg` },
+        { id: `RM-ADD-${100 + sequence}`, type: "Raw Material", name: "Additive Masterbatch", batch: `90000${String(100 + sequence).padStart(5, "0")}`, quantity: `${18 + (sequence % 8)} kg` },
+      ],
+    };
+  }
+
+  function createSlitRoll({ id, batch, sequence, family, date, sourceProduct, width, productionTime, isIntermediate, hasFailStatus }) {
+    const qcStatus = hasFailStatus ? "FAIL" : "PASS";
+    const finalFlag = isIntermediate ? "I" : "O";
+    const productCode = normalizeCode(family.key, sequence);
+
+    return {
+      id,
+      batch,
+      code: `SR${productCode}${finalFlag}`,
+      name: `Slit Roll ${family.material} ${width}mm`,
+      type: "Slit Roll",
+      productionTime,
+      location: isIntermediate ? "Packing Area - Menunggu Slitting Lanjutan" : `Dispatch Lane ${(sequence % 4) + 1}`,
+      qcStatus,
+      source: [sourceProduct.id],
+      characteristics: {
+        width: `${width} mm`,
+        length: `${5900 + sequence * 22} m`,
+        thickness: `${family.thickness} micron`,
+        weight: `${90 + sequence * 6} kg`,
+        core: "3 inch",
+        line: `Slitter Line ${(sequence % 3) + 1}`,
+      },
+      qcDetails: createQcDetails(qcStatus, "slit", family),
+      timeline: [
+        { time: addHours(date, 5), place: `Slitter Line ${(sequence % 3) + 1}`, note: sourceProduct.type === "Slit Roll" ? "Produk terbentuk dari proses slitting lanjutan." : "Produk terbentuk dari proses slitting jumbo roll." },
+        { time: productionTime, place: "QC Final", note: qcStatus === "PASS" ? "QC final lulus." : "QC final menemukan parameter yang perlu evaluasi." },
+        { time: addHours(date, 7 + (sequence % 4)), place: isIntermediate ? "Packing Area - Menunggu Slitting Lanjutan" : `Dispatch Lane ${(sequence % 4) + 1}`, note: isIntermediate ? "Produk disiapkan sebagai input slitting lanjutan." : "Produk final siap dikirim atau masuk finish good." },
+      ],
+      materials: [
+        { id: sourceProduct.id, type: sourceProduct.type, name: sourceProduct.name, batch: sourceProduct.batch, quantity: sourceProduct.type === "Jumbo Roll" ? "1 parent roll" : "1 input roll" },
+      ],
+    };
+  }
+
+  function createQcDetails(status, type, family) {
+    const markFail = (items, failIndexes) =>
+      items.map((item, index) => {
+        if (!failIndexes.includes(index)) return item;
+
+        return {
+          ...item,
+          result: "FAIL",
+          value: item.failValue,
+          reason: item.failReason,
+          action: item.action,
+        };
+      });
+
+    const jumboItems = [
+      qcItem("Thickness", "+/- 1.2 micron", "+/- 2.0 micron", "Micrometer sampling", "Left / Center / Right", `Thickness profile for ${family.material} is within tolerance.`, "+/- 2.8 micron", "Thickness variance exceeds maximum tolerance.", "Hold for QA disposition and extrusion profile review."),
+      qcItem("Width", `${family.jumboWidth} mm`, `${family.jumboWidth} mm +/- 2 mm`, "Tape measurement", "Roll face width", "Width is aligned with product specification.", `${family.jumboWidth + 5} mm`, "Width is outside product tolerance.", "Hold and review edge trim setting."),
+      qcItem("Surface Defect", "0 critical defect", "No critical defect", "Visual inspection", "Outer layer and random unwind", "No critical visual defect found.", "2 visual defects", "Critical visual defects found on sampling area.", "Hold for QA disposition."),
+      qcItem("Winding Tension", "Normal", "Stable winding profile", "Tension log review", "Winder output", "Winding tension is stable.", "Unstable", "Winding tension is not stable across the roll.", "Review winding setup before release."),
+      qcItem("Roll Hardness", "82 Shore A", "78-88 Shore A", "Hardness tester", "Left / Center / Right", "Roll hardness is evenly distributed.", "72 Shore A", "Roll hardness is below standard.", "Hold for winding evaluation."),
+      qcItem("Appearance", "OK", "Color and appearance within standard", "Visual inspection", "Outer roll surface", "Appearance is acceptable.", "Streak marks", "Appearance does not meet visual standard.", "Segregate and review with QA."),
+      qcItem("Label Verification", "Matched batch", "Batch and product code match system", "Barcode scan", "Roll label", "Label data matches production record.", "Mismatch", "Label data does not match production record.", "Block release until label is corrected."),
+    ];
+
+    const slitItems = [
+      qcItem("Slit Width", "Within tolerance", "Nominal width +/- 1 mm", "Caliper measurement", "Left / Center / Right", "Slit width is within tolerance.", "Out of tolerance", "Slit width exceeds tolerance.", "Hold and review slitter knife position."),
+      qcItem("Slit Edge Quality", "Clean edge", "No burr / tear / feathering", "Visual inspection", "Both roll edges", "Edge condition is acceptable.", "Minor burr", "Edge has burr and needs slitter setup review.", "Hold for QA disposition and knife setting review."),
+      qcItem("Roll Alignment", "1.4 mm offset", "Max 2.0 mm offset", "Side face visual check", "Roll side face", "Roll alignment is within tolerance.", "3.2 mm offset", "Offset exceeds tolerance.", "Hold for QA disposition and rewinding review."),
+      qcItem("Winding Tension", "Normal", "Stable rewinding tension", "Tension log review", "Rewinder output", "Winding tension is stable.", "Loose winding", "Winding tension is below standard.", "Rework or hold for QA disposition."),
+      qcItem("Surface Condition", "No damage", "No wrinkle / scratch / contamination", "Visual inspection", "Outer surface", "Surface condition is acceptable.", "Scratch found", "Surface damage found during inspection.", "Segregate affected roll."),
+      qcItem("Label Verification", "Matched batch", "Batch, product code, and quantity match system", "Barcode scan", "Product label", "Label matches production and parent roll record.", "Mismatch", "Label does not match production record.", "Block release until label is corrected."),
+      qcItem("Traceability Link", "Linked to source roll", "Source roll must be recorded", "System verification", "Traceability record", "Material source is linked correctly.", "Missing link", "Source roll link is incomplete.", "Hold until traceability record is corrected."),
+    ];
+
+    return status === "FAIL"
+      ? markFail(type === "jumbo" ? jumboItems : slitItems, type === "jumbo" ? [0, 2, 5] : [1, 2, 4])
+      : type === "jumbo"
+        ? jumboItems
+        : slitItems;
+  }
+
+  function qcItem(parameter, value, standard, method, samplePoint, assessment, failValue, failReason, action) {
+    return {
+      parameter,
+      value,
+      result: "PASS",
+      standard,
+      method,
+      samplePoint,
+      assessment,
+      failValue,
+      failReason,
+      action,
+    };
+  }
+
+  function createBatch(date, sequence) {
+    return `${date.replaceAll("-", "")}${String(sequence).padStart(2, "0")}`.slice(0, 10);
+  }
+
+  function createId(prefix, date, sequence) {
+    const [, month, day] = date.split("-");
+    return `${prefix}-260${month}${day}-${String(sequence).padStart(3, "0")}`;
+  }
+
+  function addHours(date, hour) {
+    return `${date} ${String(hour).padStart(2, "0")}:${hour % 2 ? "35" : "10"}`;
+  }
+
+  function normalizeCode(key, sequence) {
+    const suffix = String(sequence % 10);
+    return `${key}${suffix}`.slice(0, 3).padEnd(3, suffix);
+  }
+
   window.RollTraceMockData = {
-    credentials,
+    credentials: users,
+    users,
     products,
   };
 })(window);

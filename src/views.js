@@ -4,6 +4,7 @@
   const { icon, productBadge, qcBadge, productFlowBadge, labelize, getProductionDate, parseDate, formatDateLabel, formatMonthYear, formatLastLocation } = window.RollTraceUi;
 
   const dashboardPageSize = 5;
+  const productionPageSize = 10;
   const reportPageSize = 10;
 
   const chartPeriods = [
@@ -40,7 +41,7 @@
         <div class="login-visual">
           <p class="eyebrow">Product Intelligence Platform</p>
           <h1>Product Intelligence Center</h1>
-          <p>Ringkasan produk yang sudah diproduksi, status quality check, asal material, dan posisi terakhir produk untuk review manajemen.</p>
+          <p>Production output, QC result, material source, and current location visibility for manufacturing review.</p>
         </div>
         <div class="login-panel">
           <form class="login-card" id="loginForm" novalidate>
@@ -51,8 +52,8 @@
                 <small class="muted">Production Intelligence</small>
               </div>
             </div>
-            <h2>Masuk ke executive view</h2>
-            <p class="helper">Gunakan akun terotorisasi untuk melihat performa produksi, quality status, dan traceability roll.</p>
+            <h2>Access production monitoring</h2>
+            <p class="helper">Use an authorized account to review production output, QC result, and roll traceability.</p>
             <div class="field">
               <label for="username">Username</label>
               <div class="input-wrap">
@@ -70,7 +71,7 @@
               <span class="error-text" id="passwordError"></span>
             </div>
             <button class="login-submit" type="submit">Login</button>
-            <p class="demo-note">Demo login: <strong>admin</strong> / <strong>admin123</strong></p>
+            <p class="demo-note">Demo login: <strong>admin</strong> / <strong>admin123</strong> atau user demo lain di README.</p>
           </form>
         </div>
       </section>
@@ -79,24 +80,24 @@
 
   function renderApp() {
     const pageTitle = state.selectedProductId
-      ? "Detail Produk"
+      ? "Product Detail"
       : state.page === "report"
-        ? "Executive Traceability Report"
+        ? "Traceability Report"
         : state.page === "production"
-          ? "Roll Production List"
-          : "Dashboard";
+          ? "Production Output List"
+          : "Production Dashboard";
     const subtitle = state.selectedProductId
-      ? "Informasi karakteristik, QC, material pembentuk, dan posisi produk."
+      ? "Product characteristics, QC result, material source, and movement visibility."
       : state.page === "report"
-        ? "Ringkasan riwayat posisi, asal material, dan status quality untuk review lintas fungsi."
+        ? "Movement history, material source, and QC result for cross-functional review."
         : state.page === "production"
-          ? "Daftar Jumbo Roll dan Slit Roll yang sudah terproduksi."
-          : "Ringkasan produksi dan 5 produk terakhir yang diproduksi per page.";
+          ? "Production output list for Jumbo Roll and Slit Roll."
+          : "Production summary and latest output per page.";
 
     return `
       <section class="app-shell">
         <aside class="sidebar">
-          <button class="brand-row brand-home" data-page="dashboard" type="button" title="Ke Dashboard">
+          <button class="brand-row brand-home" data-page="dashboard" type="button" title="Go to Production Dashboard">
             <div class="brand-mark">PIC</div>
             <div>
               <strong>Product Intelligence Center</strong><br />
@@ -104,7 +105,7 @@
             </div>
           </button>
           <nav class="nav-stack">
-            <button class="nav-btn ${state.page === "production" ? "active" : ""}" data-page="production">${icon("list")} Roll Production List</button>
+            <button class="nav-btn ${state.page === "production" ? "active" : ""}" data-page="production">${icon("list")} Production Output List</button>
             <button class="nav-btn ${state.page === "report" ? "active" : ""}" data-page="report">${icon("report")} Traceability Report</button>
           </nav>
           <div class="sidebar-footer">
@@ -143,7 +144,7 @@
     return `
       <section>
         <div class="metrics">
-          <div class="metric"><span>Total Produk</span><strong>${scopedProducts.length}</strong></div>
+          <div class="metric"><span>Total Output</span><strong>${scopedProducts.length}</strong></div>
           <div class="metric"><span>Jumbo Roll</span><strong>${scopedProducts.filter((p) => p.type === "Jumbo Roll").length}</strong></div>
           <div class="metric"><span>QC PASS</span><strong>${pass}</strong></div>
           <div class="metric"><span>QC FAIL</span><strong>${fail}</strong></div>
@@ -151,50 +152,53 @@
         ${renderProductionChart()}
         <div class="toolbar">
           <div class="filters">
-            <input class="search" id="searchInput" value="${state.query}" placeholder="Cari batch, kode produk, atau nama produk" />
+            <input class="search" id="searchInput" value="${state.query}" placeholder="Search batch, product code, or product name" />
             <select class="select" id="typeFilter">
-              <option value="All" ${state.type === "All" ? "selected" : ""}>Semua tipe</option>
+              <option value="All" ${state.type === "All" ? "selected" : ""}>All product types</option>
               <option value="Jumbo Roll" ${state.type === "Jumbo Roll" ? "selected" : ""}>Jumbo Roll</option>
               <option value="Slit Roll" ${state.type === "Slit Roll" ? "selected" : ""}>Slit Roll</option>
             </select>
             ${
               state.selectedPeriod
-                ? `<button class="date-filter-chip" id="clearPeriodFilter" type="button">${state.selectedPeriod.label} <span>Reset</span></button>`
+                ? `<button class="date-filter-chip" id="clearPeriodFilter" type="button">${state.selectedPeriod.label} <span>Clear</span></button>`
                 : ""
             }
           </div>
-          <div class="view-toggle" aria-label="Ubah tampilan">
-            <button class="icon-btn ${state.view === "list" ? "active" : ""}" data-view="list" title="Tampilan list">${icon("list")}</button>
-            <button class="icon-btn ${state.view === "card" ? "active" : ""}" data-view="card" title="Tampilan card">${icon("grid")}</button>
+          <div class="view-toggle" aria-label="Change view">
+            <button class="icon-btn ${state.view === "list" ? "active" : ""}" data-view="list" title="List view">${icon("list")}</button>
+            <button class="icon-btn ${state.view === "card" ? "active" : ""}" data-view="card" title="Card view">${icon("grid")}</button>
           </div>
         </div>
-        <div class="list-note">Daftar produk di Dashboard menampilkan maksimal 5 produk terbaru per page.</div>
-        ${items.length ? (state.view === "list" ? renderProductTable(items) : renderProductCards(items)) : '<div class="empty-state">Tidak ada produk yang sesuai filter.</div>'}
+        ${items.length ? (state.view === "list" ? renderProductTable(items) : renderProductCards(items)) : '<div class="empty-state">No product matches the active filter.</div>'}
         ${renderPagination(currentPage, totalPages, orderedItems.length)}
       </section>
     `;
   }
 
   function renderProductionList() {
-    const items = filteredProducts({ includeSelectedPeriod: false }).sort((a, b) => b.productionTime.localeCompare(a.productionTime));
+    const orderedItems = filteredProducts({ includeSelectedPeriod: false }).sort((a, b) => b.productionTime.localeCompare(a.productionTime));
+    const totalPages = Math.max(1, Math.ceil(orderedItems.length / productionPageSize));
+    const currentPage = Math.min(state.productionPage, totalPages);
+    const items = paginateItems(orderedItems, currentPage, productionPageSize);
 
     return `
       <section>
         <div class="toolbar">
           <div class="filters">
-            <input class="search" id="searchInput" value="${state.query}" placeholder="Cari batch, kode produk, atau nama produk" />
+            <input class="search" id="searchInput" value="${state.query}" placeholder="Search batch, product code, or product name" />
             <select class="select" id="typeFilter">
-              <option value="All" ${state.type === "All" ? "selected" : ""}>Semua tipe</option>
+              <option value="All" ${state.type === "All" ? "selected" : ""}>All product types</option>
               <option value="Jumbo Roll" ${state.type === "Jumbo Roll" ? "selected" : ""}>Jumbo Roll</option>
               <option value="Slit Roll" ${state.type === "Slit Roll" ? "selected" : ""}>Slit Roll</option>
             </select>
           </div>
-          <div class="view-toggle" aria-label="Ubah tampilan">
-            <button class="icon-btn ${state.view === "list" ? "active" : ""}" data-view="list" title="Tampilan list">${icon("list")}</button>
-            <button class="icon-btn ${state.view === "card" ? "active" : ""}" data-view="card" title="Tampilan card">${icon("grid")}</button>
+          <div class="view-toggle" aria-label="Change view">
+            <button class="icon-btn ${state.view === "list" ? "active" : ""}" data-view="list" title="List view">${icon("list")}</button>
+            <button class="icon-btn ${state.view === "card" ? "active" : ""}" data-view="card" title="Card view">${icon("grid")}</button>
           </div>
         </div>
-        ${items.length ? (state.view === "list" ? renderProductTable(items) : renderProductCards(items)) : '<div class="empty-state">Tidak ada produk yang sesuai filter.</div>'}
+        ${items.length ? (state.view === "list" ? renderProductTable(items) : renderProductCards(items)) : '<div class="empty-state">No product matches the active filter.</div>'}
+        ${renderProductionPagination(currentPage, totalPages, orderedItems.length)}
       </section>
     `;
   }
@@ -214,9 +218,21 @@
 
     return `
       <div class="pagination">
-        <button class="ghost-btn" data-dashboard-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""} type="button">Sebelumnya</button>
+        <button class="ghost-btn" data-dashboard-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""} type="button">Previous</button>
         <span>Page ${currentPage} dari ${totalPages}</span>
-        <button class="ghost-btn" data-dashboard-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""} type="button">Berikutnya</button>
+        <button class="ghost-btn" data-dashboard-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""} type="button">Next</button>
+      </div>
+    `;
+  }
+
+  function renderProductionPagination(currentPage, totalPages, totalItems) {
+    if (totalItems <= productionPageSize) return "";
+
+    return `
+      <div class="pagination">
+        <button class="ghost-btn" data-production-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""} type="button">Previous</button>
+        <span>Page ${currentPage} dari ${totalPages}</span>
+        <button class="ghost-btn" data-production-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""} type="button">Next</button>
       </div>
     `;
   }
@@ -239,7 +255,7 @@
   function getProductionByPeriod(period) {
     const production = new Map();
 
-    getProducts().forEach((product) => {
+    getProducts().filter(productMatchesChartRange).forEach((product) => {
       const date = getProductionDate(product);
       const periodInfo = getPeriodInfo(date, period);
       const current = production.get(periodInfo.key) || {
@@ -273,10 +289,13 @@
     if (period === "weekly") {
       const weekStart = getWeekStart(date);
       const weekEnd = addDays(weekStart, 6);
+      const startDate = toDateKey(weekStart);
+      const endDate = toDateKey(weekEnd);
       return {
-        key: `weekly:${toDateKey(weekStart)}`,
-        label: `${formatDateLabel(toDateKey(weekStart))} - ${formatDateLabel(toDateKey(weekEnd))}`,
-        startDate: toDateKey(weekStart),
+        key: `weekly:${startDate}`,
+        label: `W${String(getIsoWeekNumber(weekStart)).padStart(2, "0")} ${formatMonthYear(startDate)}`,
+        detailLabel: `${formatDateLabel(startDate)} - ${formatDateLabel(endDate)}`,
+        startDate,
       };
     }
 
@@ -331,6 +350,14 @@
     return addDays(parsedDate, diff);
   }
 
+  function getIsoWeekNumber(date) {
+    const target = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const day = target.getUTCDay() || 7;
+    target.setUTCDate(target.getUTCDate() + 4 - day);
+    const yearStart = new Date(Date.UTC(target.getUTCFullYear(), 0, 1));
+    return Math.ceil(((target - yearStart) / 86400000 + 1) / 7);
+  }
+
   function addDays(date, days) {
     const copy = new Date(date);
     copy.setDate(copy.getDate() + days);
@@ -344,9 +371,28 @@
     return `${year}-${month}-${day}`;
   }
 
+  function productMatchesChartRange(product) {
+    const date = getProductionDate(product);
+    const start = state.chartRangeStart;
+    const end = state.chartRangeEnd;
+
+    return (!start || date >= start) && (!end || date <= end);
+  }
+
+  function getChartRangeLabel() {
+    const start = state.chartRangeStart;
+    const end = state.chartRangeEnd;
+
+    if (start && end) return `${formatDateLabel(start)} - ${formatDateLabel(end)}`;
+    if (start) return `From ${formatDateLabel(start)}`;
+    if (end) return `Until ${formatDateLabel(end)}`;
+    return "";
+  }
+
   function renderProductionChart() {
     const productionSeries = getProductionByPeriod(state.chartPeriod);
-    const points = getLineChartPoints(productionSeries);
+    const chartWidth = getChartWidth(productionSeries.length);
+    const points = getLineChartPoints(productionSeries, chartWidth);
     const path = points.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ");
     const areaPath = points.length
       ? `M ${points[0].x} 188 ${points.map((point) => `L ${point.x} ${point.y}`).join(" ")} L ${points[points.length - 1].x} 188 Z`
@@ -357,11 +403,11 @@
         <div class="section-title">
           <div>
             <p class="eyebrow">Production Trend</p>
-            <h3>Trend Produksi</h3>
+            <h3>Production Trend</h3>
           </div>
-          <span class="muted">${state.selectedPeriod ? `Filter aktif: ${state.selectedPeriod.label}` : "Semua periode"}</span>
+          <span class="muted">${state.selectedPeriod ? `Filter aktif: ${state.selectedPeriod.label}` : getChartRangeLabel() || "Semua periode"}</span>
         </div>
-        <div class="chart-period-toggle" aria-label="Periode grafik produksi">
+        <div class="chart-period-toggle" aria-label="Production chart period">
           ${chartPeriods
             .map(
               (period) => `
@@ -372,16 +418,30 @@
             )
             .join("")}
         </div>
+        <form class="chart-range-form" id="chartRangeForm">
+          <label>
+            <span>Start Date</span>
+            <input type="date" id="chartRangeStart" value="${state.chartRangeStart}" />
+          </label>
+          <label>
+            <span>End Date</span>
+            <input type="date" id="chartRangeEnd" value="${state.chartRangeEnd}" />
+          </label>
+          <button class="ghost-btn" type="submit">Apply</button>
+          ${(state.chartRangeStart || state.chartRangeEnd) ? '<button class="text-btn" id="clearChartRange" type="button">Reset</button>' : ""}
+        </form>
         <div class="production-chart">
-          <svg class="line-chart" viewBox="0 0 680 260" role="img" aria-label="Trend produksi">
+          ${
+            productionSeries.length
+              ? `<svg class="line-chart" style="min-width: ${chartWidth}px" viewBox="0 0 ${chartWidth} 260" role="img" aria-label="Production trend">
             <defs>
               <linearGradient id="productionArea" x1="0" x2="0" y1="0" y2="1">
                 <stop offset="0%" stop-color="#0f7473" stop-opacity="0.22" />
                 <stop offset="100%" stop-color="#0f7473" stop-opacity="0.02" />
               </linearGradient>
             </defs>
-            <path class="line-chart-grid" d="M 48 40 H 632 M 48 114 H 632 M 48 188 H 632" />
-            <path class="line-chart-axis" d="M 48 188 H 632" />
+            <path class="line-chart-grid" d="M 48 40 H ${chartWidth - 48} M 48 114 H ${chartWidth - 48} M 48 188 H ${chartWidth - 48}" />
+            <path class="line-chart-axis" d="M 48 188 H ${chartWidth - 48}" />
             <path class="line-chart-area" d="${areaPath}" />
             <path class="line-chart-path" d="${path}" />
             ${points
@@ -394,29 +454,51 @@
                     data-production-label="${point.label}"
                     tabindex="0"
                     role="button"
-                    aria-label="Filter produksi periode ${point.label}"
+                    aria-label="Filter production period ${point.label}"
                   >
-                    <title>${point.label}: ${point.total} produk, ${point.pass} PASS, ${point.fail} FAIL</title>
+                    <title>${point.detailLabel || point.label}: ${point.total} products, ${point.pass} PASS, ${point.fail} FAIL</title>
                     <line class="point-guide" x1="${point.x}" y1="${point.y}" x2="${point.x}" y2="188" />
                     <circle class="point-hit" cx="${point.x}" cy="${point.y}" r="24" />
                     <circle class="point-dot" cx="${point.x}" cy="${point.y}" r="7" />
                     <text class="point-value" x="${point.x}" y="${point.y - 16}">${point.total}</text>
-                    <text class="point-label" x="${point.x}" y="224">${point.label}</text>
-                    <text class="point-meta" x="${point.x}" y="244">${point.pass}P / ${point.fail}F</text>
+                    ${
+                      point.showLabel
+                        ? `
+                          <text class="point-label" x="${point.x}" y="224">${point.displayLabel}</text>
+                          <text class="point-meta" x="${point.x}" y="244">${point.pass}P / ${point.fail}F</text>
+                        `
+                        : ""
+                    }
                   </g>
                 `,
               )
               .join("")}
-          </svg>
+          </svg>`
+              : '<div class="empty-state">No production data matches the selected date range.</div>'
+          }
         </div>
       </section>
     `;
   }
 
-  function getLineChartPoints(productionSeries) {
+  function getChartWidth(pointCount) {
+    return Math.max(680, pointCount * 58 + 120);
+  }
+
+  function getChartLabelInterval(pointCount) {
+    if (pointCount <= 10) return 1;
+    if (pointCount <= 18) return 2;
+    return Math.ceil(pointCount / 9);
+  }
+
+  function getDisplayLabel(item) {
+    return item.label;
+  }
+
+  function getLineChartPoints(productionSeries, chartWidth) {
     const chart = {
       left: 56,
-      right: 624,
+      right: chartWidth - 56,
       top: 40,
       bottom: 188,
     };
@@ -425,13 +507,17 @@
     const minTotal = Math.min(...totals, 0);
     const range = Math.max(maxTotal - minTotal, 1);
     const step = productionSeries.length > 1 ? (chart.right - chart.left) / (productionSeries.length - 1) : 0;
+    const labelInterval = getChartLabelInterval(productionSeries.length);
 
     return productionSeries.map((item, index) => {
       const x = productionSeries.length > 1 ? Math.round(chart.left + step * index) : Math.round((chart.left + chart.right) / 2);
       const y = Math.round(chart.bottom - ((item.total - minTotal) / range) * (chart.bottom - chart.top));
+      const showLabel = index % labelInterval === 0 || index === productionSeries.length - 1;
 
       return {
         ...item,
+        displayLabel: getDisplayLabel(item),
+        showLabel,
         x,
         y,
       };
@@ -444,13 +530,13 @@
         <table>
           <thead>
             <tr>
-              <th>Nomor Batch</th>
-              <th>Kode Produk</th>
-              <th>Nama Produk</th>
-              <th>Jam Produksi</th>
-              <th>Tipe</th>
-              <th>Status Proses</th>
-              <th>QC</th>
+              <th>Batch No.</th>
+              <th>Product Code</th>
+              <th>Product Name</th>
+              <th>Production Time</th>
+              <th>Product Type</th>
+              <th>Process Status</th>
+              <th>QC Result</th>
             </tr>
           </thead>
           <tbody>
@@ -490,8 +576,8 @@
                   ${qcBadge(product.qcStatus)}
                 </div>
                 <div class="kv">
-                  <div><span>Kode Produk</span><strong>${product.code}</strong></div>
-                  <div><span>Jam Produksi</span><strong>${product.productionTime}</strong></div>
+                  <div><span>Product Code</span><strong>${product.code}</strong></div>
+                  <div><span>Production Time</span><strong>${product.productionTime}</strong></div>
                 </div>
                 <div class="detail-actions">${productBadge(product)} ${productFlowBadge(product)}</div>
               </article>
@@ -516,21 +602,21 @@
               <h2>${product.name}</h2>
               <div class="detail-meta">
                 <strong>${product.code}</strong>
-                <span>Tanggal Produksi: ${product.productionTime}</span>
-                <span>Posisi terakhir: ${lastLocation}</span>
+                <span>Production Date: ${product.productionTime}</span>
+                <span>Current Location: ${lastLocation}</span>
               </div>
             </div>
             <div class="detail-actions">
               ${productBadge(product)}
               ${productFlowBadge(product)}
               ${qcBadge(product.qcStatus)}
-              <button class="ghost-btn" id="backBtn">${icon("back")} Kembali</button>
+              <button class="ghost-btn" id="backBtn">${icon("back")} Back</button>
             </div>
           </div>
         </div>
         <div class="detail-layout">
           <div class="detail-panel">
-            <div class="section-title"><h3>Karakteristik Produk</h3></div>
+            <div class="section-title"><h3>Product Characteristics</h3></div>
             <div class="characteristics">
               ${Object.entries(product.characteristics)
                 .map(([key, value]) => `<div class="info-box"><span>${labelize(key)}</span><strong>${value}</strong></div>`)
@@ -538,9 +624,16 @@
             </div>
           </div>
           <div class="detail-panel">
-            <div class="section-title"><h3>Quality Check</h3>${qcBadge(product.qcStatus)}</div>
+            <div class="section-title">
+              <h3>QC Detail</h3>
+              <div class="detail-actions">
+                ${qcBadge(product.qcStatus)}
+                <button class="text-btn compact-btn" data-qc-product="${product.id}" type="button">View Full QC</button>
+              </div>
+            </div>
             <div class="qc-list">
               ${product.qcDetails
+                .slice(0, 3)
                 .map((qc) => {
                   const assessment = getQcAssessment(qc);
 
@@ -552,7 +645,7 @@
                       </div>
                       ${qcBadge(qc.result)}
                       <div class="qc-assessment" role="tooltip">
-                        <strong>Penilaian</strong>
+                        <strong>Assessment</strong>
                         <span>${assessment}</span>
                       </div>
                     </div>
@@ -562,7 +655,7 @@
             </div>
           </div>
           <div class="detail-panel">
-            <div class="section-title"><h3>Histori Posisi Produk</h3></div>
+            <div class="section-title"><h3>Movement History</h3></div>
             <div class="timeline">
               ${product.timeline
                 .map((event) => {
@@ -582,10 +675,10 @@
                             ? `
                               <div class="timeline-related">
                                 <div>
-                                  <span>Produk hasil slitting</span>
+                                  <span>Slitting Output</span>
                                   <strong>${linkedProduct.batch} - ${linkedProduct.name}</strong>
                                 </div>
-                                <button class="text-btn" data-product="${linkedProduct.id}" type="button">Lihat detail</button>
+                                <button class="text-btn" data-product="${linkedProduct.id}" type="button">View Detail</button>
                               </div>
                             `
                             : ""
@@ -598,7 +691,7 @@
             </div>
           </div>
           <div class="detail-panel">
-            <div class="section-title"><h3>Material Pembentuk</h3></div>
+            <div class="section-title"><h3>Material Source</h3></div>
             <div class="material-list">
               ${product.materials
                 .map(
@@ -610,7 +703,7 @@
                       </div>
                       ${
                         productRepository.exists(material.id)
-                          ? `<button class="text-btn" data-product="${material.id}">Lihat detail</button>`
+                          ? `<button class="text-btn" data-product="${material.id}">View Detail</button>`
                           : `<button class="text-btn" data-material="${material.id}">Raw material</button>`
                       }
                     </div>
@@ -634,12 +727,12 @@
       <section class="report-view">
         <div class="report-panel">
           <div class="section-title">
-            <h3>Traceability Produk</h3>
+            <h3>Traceability Report</h3>
             <button class="primary-btn" id="exportBtn">Export CSV</button>
           </div>
           <div class="toolbar report-toolbar">
             <div class="filters">
-              <input class="search" id="reportSearchInput" value="${state.reportQuery}" placeholder="Cari batch, kode produk, nama produk, atau lokasi" />
+              <input class="search" id="reportSearchInput" value="${state.reportQuery}" placeholder="Search batch, product code, product name, or location" />
             </div>
           </div>
           <div class="report-list">
@@ -651,8 +744,8 @@
                     <button class="report-item ${state.selectedReportProductId === product.id ? "active" : ""}" data-report-product="${product.id}" type="button">
                       <div>
                         <strong>${product.batch} - ${product.name}</strong>
-                        <div class="muted">Tanggal Produksi: ${product.productionTime}</div>
-                        <div class="muted">Posisi Terakhir: ${formatLastLocation(product.location)}</div>
+                        <div class="muted">Production Date: ${product.productionTime}</div>
+                        <div class="muted">Current Location: ${formatLastLocation(product.location)}</div>
                       </div>
                       <div class="detail-actions">
                         ${qcBadge(product.qcStatus)}
@@ -663,7 +756,7 @@
                 `,
               )
               .join("")
-              : '<div class="empty-state">Tidak ada produk yang sesuai pencarian.</div>'}
+              : '<div class="empty-state">No product matches the search criteria.</div>'}
           </div>
           ${renderReportPagination(currentPage, totalPages, reportItems.length)}
         </div>
@@ -696,7 +789,7 @@
         </div>
         <div class="report-trace-layout">
           <div class="trace-card">
-            <div class="section-title"><h3>Histori Perpindahan</h3></div>
+            <div class="section-title"><h3>Movement History</h3></div>
             <div class="timeline">
               ${product.timeline
                 .map(
@@ -715,7 +808,7 @@
             </div>
           </div>
           <div class="trace-card">
-            <div class="section-title"><h3>Produk Pembentuk</h3></div>
+            <div class="section-title"><h3>Material Source</h3></div>
             <div class="material-list">
               ${product.materials
                 .map(
@@ -741,9 +834,9 @@
 
     return `
       <div class="pagination">
-        <button class="ghost-btn" data-report-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""} type="button">Sebelumnya</button>
+        <button class="ghost-btn" data-report-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""} type="button">Previous</button>
         <span>Page ${currentPage} dari ${totalPages}</span>
-        <button class="ghost-btn" data-report-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""} type="button">Berikutnya</button>
+        <button class="ghost-btn" data-report-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""} type="button">Next</button>
       </div>
     `;
   }
