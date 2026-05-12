@@ -24,11 +24,12 @@ Product Intelligence Center is a manufacturing dashboard for reviewing productio
 
 ## Mock Data
 
-- Mock data has 50 products across January-April 2026.
-- Product split: 20 Jumbo Roll and 30 Slit Roll.
+- Mock data has 60 products across January-April 2026.
+- Product split: 20 Jumbo Roll and 40 Slit Roll.
+- Mock data includes 10 joined Slit Roll examples, with 2 joined Slit Roll products per month from January-April 2026 plus one multi-stage join scenario.
 - Batch format: 10 numeric digits.
 - Product code format: `JR` or `SR` + 3 alphanumeric product code + `I` or `O`.
-- `I` means Slitting Input.
+- `I` means Semi-finished Good / available as input for the next production step.
 - `O` means Finish Good.
 - Jumbo Roll is always slitting input.
 - Slit Roll can be slitting input only when code ends with `I`.
@@ -57,8 +58,9 @@ Product Intelligence Center is a manufacturing dashboard for reviewing productio
 - Product Name
 - Production Time
 - Product Type
-- Process Status
-- Slitting Input
+- Product Stage
+- Raw Material
+- Semi-finished Good
 - Finish Good
 - Current Location
 
@@ -73,6 +75,15 @@ Product Intelligence Center is a manufacturing dashboard for reviewing productio
 - Production Trend now has a date range filter and weekly chart labels use manufacturing-style `Wxx Mon YYYY`.
 - Color palette was adjusted toward dark-blue/yellow corporate branding while retaining production readability, neutral surfaces, amber process accents, and clear PASS/FAIL colors.
 - Remaining warm/beige surfaces were aligned to the dark-blue/yellow palette across login, toolbar, inputs, chart grid, modals, report, and QC surfaces.
+- Traceability Report Material Source now renders as a source tree that can drill down from selected product to source roll and Raw Material details.
+- Joined Slit Roll mock data includes detailed Movement History on both joined output and source rolls, including Source Roll Staging and Join / Splicing usage notes.
+- Joined roll Movement History displays source rolls as structured bullet/list details instead of a single long sentence.
+- Joined Slit Roll mock scenarios include different join locations such as Rework Join Area, Temporary Join Cell, and External Finishing Area, with source origin and join location shown in Movement History source details.
+- Multi-stage joined roll scenario exists for batch `2026043092`: two source rolls are joined at `Join / Splicing Station 4`, moved to `Rework Join Area - Bench C`, joined again with one additional source roll, then finished at Dispatch Lane 1.
+- Movement History for multi-stage final roll links the intermediate roll `2026043091` as `Intermediate Roll` with a View Detail action.
+- Material Source tree uses native expand/collapse via `details` / `summary`, while keeping Detail and Source Detail actions available per node.
+- Product classification label was standardized from Process Status / Slitting Input to Product Stage / Semi-finished Good / Finish Good / Raw Material.
+- Movement History for joined roll product detail starts when the joined roll is formed; pre-formation source staging remains on source roll history and Material Source tree.
 
 ## Outstanding
 

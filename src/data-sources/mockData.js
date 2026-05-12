@@ -86,6 +86,9 @@
       }
     });
 
+    addJoinedSlitRolls(items);
+    addMultiStageJoinScenario(items);
+
     return items.sort((a, b) => b.productionTime.localeCompare(a.productionTime));
   }
 
@@ -158,6 +161,287 @@
         { id: sourceProduct.id, type: sourceProduct.type, name: sourceProduct.name, batch: sourceProduct.batch, quantity: sourceProduct.type === "Jumbo Roll" ? "1 parent roll" : "1 input roll" },
       ],
     };
+  }
+
+  function addJoinedSlitRolls(items) {
+    const joinDates = ["2026-01-31", "2026-02-28", "2026-03-31", "2026-04-30"];
+    let joinSequence = 81;
+
+    joinDates.forEach((date, monthIndex) => {
+      const monthKey = date.slice(0, 7);
+      const sourceCandidates = items
+        .filter((product) => product.type === "Slit Roll" && product.productionTime.startsWith(monthKey) && product.qcStatus === "PASS")
+        .sort((a, b) => a.productionTime.localeCompare(b.productionTime));
+
+      for (let pairIndex = 0; pairIndex < 2; pairIndex += 1) {
+        const sourceProducts = sourceCandidates.slice(pairIndex * 2, pairIndex * 2 + 2);
+        if (sourceProducts.length < 2) continue;
+
+        const family = getFamilyFromProduct(sourceProducts[0]) || productFamilies[monthIndex % productFamilies.length];
+        const joinLocation = getJoinLocation(monthIndex, pairIndex);
+        const joinedRoll = createJoinedSlitRoll({
+          id: createId("SR", date, joinSequence),
+          batch: createBatch(date, joinSequence),
+          sequence: joinSequence,
+          family,
+          date,
+          sourceProducts,
+          productionTime: `${date} ${String(13 + pairIndex * 2).padStart(2, "0")}:25`,
+          joinLocation,
+        });
+
+        sourceProducts.forEach((sourceProduct, sourceIndex) => {
+          const originLocation = formatCurrentLocation(sourceProduct.location);
+          sourceProduct.timeline.push({
+            time: `${date} 12:${String(35 + sourceIndex * 10).padStart(2, "0")}`,
+            place: `${joinLocation} - Source Staging`,
+            note: `Dipindahkan dari ${originLocation} sebagai source ${sourceIndex + 1} untuk join ${joinedRoll.batch} - ${joinedRoll.name}.`,
+            relatedProductId: joinedRoll.id,
+            relatedProductLabel: joinedRoll.batch,
+          });
+          sourceProduct.timeline.push({
+            time: joinedRoll.productionTime,
+            place: joinLocation,
+            note: `Source ${sourceIndex + 1} digunakan untuk membentuk ${joinedRoll.batch} - ${joinedRoll.name}.`,
+            relatedProductId: joinedRoll.id,
+            relatedProductLabel: joinedRoll.batch,
+          });
+          sourceProduct.location = `Terpakai untuk Join / Splicing - ${joinLocation}`;
+        });
+
+        items.push(joinedRoll);
+        joinSequence += 1;
+      }
+    });
+  }
+
+  function createJoinedSlitRoll({ id, batch, sequence, family, date, sourceProducts, productionTime, joinLocation }) {
+    const width = sourceProducts[0].characteristics.width;
+    const widthValue = Number.parseInt(width, 10);
+    const productCode = normalizeCode(family.key, sequence);
+    const sourceDetails = formatSourceRollDetails(sourceProducts, joinLocation);
+
+    return {
+      id,
+      batch,
+      code: `SR${productCode}O`,
+      name: `Slit Roll ${family.material} ${widthValue}mm - Joined`,
+      type: "Slit Roll",
+      productionTime,
+      location: `Dispatch Lane ${(sequence % 4) + 1}`,
+      qcStatus: "PASS",
+      source: sourceProducts.map((sourceProduct) => sourceProduct.id),
+      characteristics: {
+        width,
+        length: `${sourceProducts.reduce((total, sourceProduct) => total + Number.parseInt(sourceProduct.characteristics.length, 10), 0)} m`,
+        thickness: `${family.thickness} micron`,
+        weight: `${sourceProducts.reduce((total, sourceProduct) => total + Number.parseInt(sourceProduct.characteristics.weight, 10), 0)} kg`,
+        core: "3 inch",
+        line: joinLocation,
+      },
+      qcDetails: createQcDetails("PASS", "slit", family),
+      timeline: [
+        { time: productionTime, place: joinLocation, note: "Produk selesai terbentuk dari proses join menggunakan source roll berikut.", sourceDetails },
+        { time: addHours(date, 16 + (sequence % 2)), place: "QC Final", note: "QC final join roll lulus dan traceability source lengkap." },
+        { time: addHours(date, 18 + (sequence % 2)), place: `Dispatch Lane ${(sequence % 4) + 1}`, note: "Produk final siap dikirim atau masuk finish good." },
+      ],
+      materials: sourceProducts.map((sourceProduct, index) => ({
+        id: sourceProduct.id,
+        type: sourceProduct.type,
+        name: sourceProduct.name,
+        batch: sourceProduct.batch,
+        quantity: index === 0 ? "0.55 input roll" : "0.45 input roll",
+      })),
+    };
+  }
+
+  function addMultiStageJoinScenario(items) {
+    const date = "2026-04-30";
+    const sourceProducts = items
+      .filter((product) => product.type === "Slit Roll" && product.productionTime.startsWith("2026-04") && product.qcStatus === "PASS" && !product.name.includes(" - Joined"))
+      .sort((a, b) => a.productionTime.localeCompare(b.productionTime))
+      .slice(1, 4);
+
+    if (sourceProducts.length < 3) return;
+
+    const family = getFamilyFromProduct(sourceProducts[0]) || productFamilies[3];
+    const firstJoinLocation = "Join / Splicing Station 4";
+    const secondJoinLocation = "Rework Join Area - Bench C";
+    const firstStageSources = sourceProducts.slice(0, 2);
+    const finalStageSource = sourceProducts[2];
+    const intermediateRoll = createMultiStageIntermediateJoin({
+      id: createId("SR", date, 91),
+      batch: createBatch(date, 91),
+      sequence: 91,
+      family,
+      date,
+      sourceProducts: firstStageSources,
+      productionTime: `${date} 10:40`,
+      joinLocation: firstJoinLocation,
+      nextLocation: secondJoinLocation,
+    });
+
+    firstStageSources.forEach((sourceProduct, sourceIndex) => {
+      addSourceRollJoinMovement({
+        sourceProduct,
+        sourceIndex,
+        targetProduct: intermediateRoll,
+        stagingTime: `${date} 09:${String(25 + sourceIndex * 10).padStart(2, "0")}`,
+        joinTime: intermediateRoll.productionTime,
+        joinLocation: firstJoinLocation,
+      });
+    });
+
+    items.push(intermediateRoll);
+
+    const finalRoll = createMultiStageFinalJoin({
+      id: createId("SR", date, 92),
+      batch: createBatch(date, 92),
+      sequence: 92,
+      family,
+      date,
+      sourceProducts: [intermediateRoll, finalStageSource],
+      productionTime: `${date} 14:15`,
+      firstJoinLocation,
+      secondJoinLocation,
+    });
+
+    addIntermediateRollTransfer({
+      intermediateRoll,
+      finalRoll,
+      date,
+      fromLocation: firstJoinLocation,
+      toLocation: secondJoinLocation,
+    });
+
+    [intermediateRoll, finalStageSource].forEach((sourceProduct, sourceIndex) => {
+      addSourceRollJoinMovement({
+        sourceProduct,
+        sourceIndex,
+        targetProduct: finalRoll,
+        stagingTime: `${date} 13:${String(10 + sourceIndex * 10).padStart(2, "0")}`,
+        joinTime: finalRoll.productionTime,
+        joinLocation: secondJoinLocation,
+      });
+    });
+
+    items.push(finalRoll);
+  }
+
+  function createMultiStageIntermediateJoin({ id, batch, sequence, family, date, sourceProducts, productionTime, joinLocation, nextLocation }) {
+    const roll = createJoinedSlitRoll({
+      id,
+      batch,
+      sequence,
+      family,
+      date,
+      sourceProducts,
+      productionTime,
+      joinLocation,
+    });
+
+    return {
+      ...roll,
+      code: `${roll.code.slice(0, 5)}I`,
+      name: roll.name.replace(" - Joined", " - Stage 1 Joined"),
+      location: `${nextLocation} - Transfer Queue`,
+      timeline: [
+        { time: productionTime, place: joinLocation, note: "Join tahap pertama selesai menggunakan dua source roll berikut.", sourceDetails: formatSourceRollDetails(sourceProducts, joinLocation) },
+        { time: `${date} 11:20`, place: `${nextLocation} - Transfer Queue`, note: "Intermediate joined roll dipindahkan ke lokasi join kedua." },
+      ],
+    };
+  }
+
+  function createMultiStageFinalJoin({ id, batch, sequence, family, date, sourceProducts, productionTime, firstJoinLocation, secondJoinLocation }) {
+    const roll = createJoinedSlitRoll({
+      id,
+      batch,
+      sequence,
+      family,
+      date,
+      sourceProducts,
+      productionTime,
+      joinLocation: secondJoinLocation,
+    });
+
+    return {
+      ...roll,
+      name: roll.name.replace(" - Joined", " - Multi-stage Joined"),
+      location: "Dispatch Lane 1",
+      timeline: [
+        { time: productionTime, place: secondJoinLocation, note: "Roll selesai terbentuk dari join tahap kedua menggunakan intermediate roll dan source roll tambahan berikut.", sourceDetails: formatSourceRollDetails(sourceProducts, secondJoinLocation), relatedProductId: sourceProducts[0].id, relatedProductLabel: sourceProducts[0].batch, relatedProductType: "Intermediate Roll" },
+        { time: `${date} 16:20`, place: "QC Final", note: "QC final multi-stage joined roll lulus dan traceability source lengkap." },
+        { time: `${date} 18:10`, place: "Dispatch Lane 1", note: "Produk final selesai diproduksi dan siap dikirim atau masuk finish good." },
+      ],
+    };
+  }
+
+  function addSourceRollJoinMovement({ sourceProduct, sourceIndex, targetProduct, stagingTime, joinTime, joinLocation }) {
+    const originLocation = formatCurrentLocation(sourceProduct.location);
+
+    sourceProduct.timeline.push({
+      time: stagingTime,
+      place: `${joinLocation} - Source Staging`,
+      note: `Dipindahkan dari ${originLocation} sebagai source ${sourceIndex + 1} untuk join ${targetProduct.batch} - ${targetProduct.name}.`,
+      relatedProductId: targetProduct.id,
+      relatedProductLabel: targetProduct.batch,
+    });
+    sourceProduct.timeline.push({
+      time: joinTime,
+      place: joinLocation,
+      note: `Source ${sourceIndex + 1} digunakan untuk membentuk ${targetProduct.batch} - ${targetProduct.name}.`,
+      relatedProductId: targetProduct.id,
+      relatedProductLabel: targetProduct.batch,
+    });
+    sourceProduct.location = `Terpakai untuk Join / Splicing - ${joinLocation}`;
+  }
+
+  function addIntermediateRollTransfer({ intermediateRoll, finalRoll, date, fromLocation, toLocation }) {
+    intermediateRoll.timeline.push({
+      time: `${date} 12:30`,
+      place: `${fromLocation} - Transfer Out`,
+      note: `Intermediate roll dikirim ke ${toLocation} untuk join tahap kedua ${finalRoll.batch} - ${finalRoll.name}.`,
+      relatedProductId: finalRoll.id,
+      relatedProductLabel: finalRoll.batch,
+    });
+    intermediateRoll.timeline.push({
+      time: `${date} 13:05`,
+      place: `${toLocation} - Source Staging`,
+      note: `Intermediate roll diterima sebagai source 1 untuk join tahap kedua ${finalRoll.batch} - ${finalRoll.name}.`,
+      relatedProductId: finalRoll.id,
+      relatedProductLabel: finalRoll.batch,
+    });
+  }
+
+  function getFamilyFromProduct(product) {
+    return productFamilies.find((family) => product.name.includes(family.material));
+  }
+
+  function getJoinLocation(monthIndex, pairIndex) {
+    const locations = [
+      ["Join / Splicing Station 1", "Rework Join Area - Bench A"],
+      ["Join / Splicing Station 2", "Temporary Join Cell - Line B"],
+      ["Rework Join Area - Bench B", "Join / Splicing Station 3"],
+      ["Temporary Join Cell - Line C", "External Finishing Area - Join Desk"],
+    ];
+
+    return locations[monthIndex % locations.length][pairIndex];
+  }
+
+  function formatCurrentLocation(location) {
+    return String(location).replace(/^Terpakai untuk Slitting -\s*/i, "").replace(/^Terpakai untuk Join \/ Splicing -\s*/i, "");
+  }
+
+  function formatSourceRollDetails(sourceProducts, joinLocation) {
+    return sourceProducts
+      .map((sourceProduct, index) => ({
+        label: `Source ${index + 1}`,
+        batch: sourceProduct.batch,
+        name: sourceProduct.name,
+        quantity: index === 0 ? "0.55 input roll" : "0.45 input roll",
+        originLocation: formatCurrentLocation(sourceProduct.location),
+        joinLocation,
+      }));
   }
 
   function createQcDetails(status, type, family) {

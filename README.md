@@ -26,12 +26,12 @@ Demo login:
 ## Fitur
 
 - Login page dengan validasi field, panjang password, dan kredensial.
-- Mock data berisi 50 produk Jumbo Roll dan Slit Roll yang tersebar dari Januari sampai April 2026.
+- Mock data berisi 60 produk Jumbo Roll dan Slit Roll yang tersebar dari Januari sampai April 2026, termasuk skenario joined roll dan multi-stage join.
 - Production Dashboard sebagai halaman awal dengan production summary, chart, dan daftar maksimal 5 output terakhir per page.
 - Production Output List sebagai halaman list-only untuk Jumbo Roll dan Slit Roll yang terproduksi.
-- Kode produk mengikuti format 6 karakter: `JR`/`SR` + 3 kode alfanumerik + `I` untuk input slitting atau `O` untuk produk final.
+- Kode produk mengikuti format 6 karakter: `JR`/`SR` + 3 kode alfanumerik + `I` untuk Semi-finished Good atau `O` untuk Finish Good.
 - Batch produk menggunakan 10 digit angka.
-- Jumbo Roll diset sebagai input slitting; Slit Roll dapat menjadi input slitting lanjutan jika kode berakhiran `I`, dan menjadi produk final jika berakhiran `O`.
+- Jumbo Roll dikategorikan sebagai Semi-finished Good; Slit Roll dapat menjadi Semi-finished Good jika kode berakhiran `I`, dan menjadi Finish Good jika berakhiran `O`.
 - Line chart Production Trend dengan pilihan periode harian, mingguan, bulanan, kuartal, semester, dan tahunan.
 - Filter produk saat titik periode pada chart dipilih.
 - Toggle tampilan list atau card.

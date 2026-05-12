@@ -20,16 +20,18 @@
     return `<span class="pill ${status.toLowerCase()}"><span class="pill-text">${status}</span></span>`;
   }
 
-  function getProductFlow(product) {
+  function getProductStage(product) {
     const suffix = product.code.slice(-1).toUpperCase();
 
     return suffix === "I"
-      ? { label: "Slitting Input", className: "input" }
+      ? { label: "Semi-finished Good", className: "input" }
       : { label: "Finish Good", className: "final" };
   }
 
+  const getProductFlow = getProductStage;
+
   function productFlowBadge(product) {
-    const flow = getProductFlow(product);
+    const flow = getProductStage(product);
     return `<span class="pill ${flow.className}"><span class="pill-text">${flow.label}</span></span>`;
   }
 
@@ -177,6 +179,7 @@
     icon,
     productBadge,
     qcBadge,
+    getProductStage,
     getProductFlow,
     productFlowBadge,
     labelize,

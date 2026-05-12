@@ -198,13 +198,8 @@
 
     document.querySelectorAll("[data-material]").forEach((button) => {
       button.addEventListener("click", (event) => {
-        const material = event.currentTarget.dataset.material;
-
-        showModal({
-          title: "Detail Raw Material",
-          message: `Detail raw material ${material} siap disambungkan ke master material/API.`,
-          actionLabel: "Mengerti",
-        });
+        event.stopPropagation();
+        showMaterialSourceModal(event.currentTarget.dataset.material);
       });
     });
 
@@ -338,6 +333,64 @@
     if (!matchesSearch) {
       state.selectedReportProductId = null;
     }
+  }
+
+  function showMaterialSourceModal(materialId) {
+    const materialInfo = findMaterialSource(materialId);
+
+    if (!materialInfo) {
+      showModal({
+        title: "Source Detail",
+        message: `Source ${materialId} belum tersedia di master material.`,
+        actionLabel: "Close",
+      });
+      return;
+    }
+
+    const { material, usedByProducts } = materialInfo;
+
+    showHtmlModal({
+      title: material.name,
+      eyebrow: "Raw Material Source",
+      actionLabel: "Close",
+      content: `
+        <div class="source-detail-grid">
+          <div><span>Material ID</span><strong>${escapeHtml(material.id)}</strong></div>
+          <div><span>Batch No.</span><strong>${escapeHtml(material.batch)}</strong></div>
+          <div><span>Type</span><strong>${escapeHtml(material.type)}</strong></div>
+          <div><span>Quantity</span><strong>${escapeHtml(material.quantity)}</strong></div>
+          <div><span>Used By</span><strong>${usedByProducts.length} product${usedByProducts.length === 1 ? "" : "s"}</strong></div>
+        </div>
+        <div class="source-used-list">
+          ${usedByProducts
+            .map(
+              (usedByProduct) => `
+                <div class="source-used-item">
+                  <strong>${escapeHtml(usedByProduct.batch)} - ${escapeHtml(usedByProduct.name)}</strong>
+                  <span>${escapeHtml(usedByProduct.type)} | ${escapeHtml(usedByProduct.productionTime)}</span>
+                </div>
+              `,
+            )
+            .join("")}
+        </div>
+      `,
+    });
+  }
+
+  function findMaterialSource(materialId) {
+    let material = null;
+    const usedByProducts = [];
+
+    product.getProducts().forEach((candidate) => {
+      candidate.materials.forEach((candidateMaterial) => {
+        if (candidateMaterial.id !== materialId) return;
+
+        material = material || candidateMaterial;
+        usedByProducts.push(candidate);
+      });
+    });
+
+    return material ? { material, usedByProducts } : null;
   }
 
   async function handleLogin(event, render) {

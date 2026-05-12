@@ -1373,6 +1373,49 @@ tr.clickable,
   margin-top: 3px;
 }
 
+.timeline-source-list {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.timeline-source-list li {
+  position: relative;
+  padding: 9px 10px 9px 28px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.timeline-source-list li::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 16px;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+.timeline-source-list strong,
+.timeline-source-list span,
+.timeline-source-list small {
+  display: block;
+}
+
+.timeline-source-list strong {
+  color: var(--ink);
+  font-size: 0.84rem;
+}
+
+.timeline-source-list small {
+  margin-top: 2px;
+  color: var(--muted);
+}
+
 .timeline-related {
   display: flex;
   align-items: center;
@@ -1402,6 +1445,111 @@ tr.clickable,
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+}
+
+.material-tree {
+  display: grid;
+  gap: 10px;
+}
+
+.material-tree-node {
+  position: relative;
+}
+
+.material-tree-node summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.material-tree-node summary::-webkit-details-marker {
+  display: none;
+}
+
+.material-tree-node summary .material-tree-line {
+  padding-left: 36px;
+}
+
+.material-tree-node summary .material-tree-line::before {
+  content: ">";
+  position: absolute;
+  left: 14px;
+  top: 16px;
+  color: var(--brand);
+  font-weight: 900;
+  transition: transform 0.16s;
+}
+
+.material-tree-node[open] > summary .material-tree-line::before {
+  transform: rotate(90deg);
+}
+
+.material-tree-line {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.material-tree-line strong {
+  overflow-wrap: anywhere;
+}
+
+.material-tree-node.product-source > .material-tree-line {
+  border-color: #a8bdd4;
+  background: #f8fafc;
+}
+
+.material-tree-node.raw-source > .material-tree-line {
+  border-color: #f0d19d;
+  background: #fff8e6;
+}
+
+.material-tree-node.raw-source summary .material-tree-line {
+  border-color: #f0d19d;
+  background: #fff8e6;
+}
+
+.material-tree-children {
+  margin: 8px 0 0 16px;
+  padding-left: 14px;
+  border-left: 2px solid #d9e2ec;
+  display: grid;
+  gap: 8px;
+}
+
+.source-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.source-detail-grid div,
+.source-used-item {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.source-detail-grid span,
+.source-used-item span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.source-used-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
 }
 
 .text-btn {
@@ -1646,8 +1794,18 @@ tr.clickable,
   .kv,
   .qc-summary-strip,
   .qc-modal-grid,
-  .qc-modal-detail {
+  .qc-modal-detail,
+  .source-detail-grid {
     grid-template-columns: 1fr;
+  }
+
+  .material-tree-line {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .material-tree-line .text-btn {
+    width: 100%;
   }
 
   .modal-card {

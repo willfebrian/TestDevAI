@@ -1,7 +1,7 @@
 (function registerViews(window) {
   const state = window.RollTraceState;
   const productRepository = window.RollTraceRepositories.product;
-  const { icon, productBadge, qcBadge, productFlowBadge, labelize, getProductionDate, parseDate, formatDateLabel, formatMonthYear, formatLastLocation } = window.RollTraceUi;
+  const { icon, productBadge, qcBadge, getProductStage, productFlowBadge, labelize, getProductionDate, parseDate, formatDateLabel, formatMonthYear, formatLastLocation } = window.RollTraceUi;
 
   const dashboardPageSize = 5;
   const productionPageSize = 10;
@@ -535,7 +535,7 @@
               <th>Product Name</th>
               <th>Production Time</th>
               <th>Product Type</th>
-              <th>Process Status</th>
+              <th>Product Stage</th>
               <th>QC Result</th>
             </tr>
           </thead>
@@ -670,12 +670,13 @@
                         <strong>${event.place}</strong>
                         <span>${event.time}</span>
                         <p class="muted">${event.note}</p>
+                        ${renderTimelineSourceDetails(event)}
                         ${
                           linkedProduct
                             ? `
                               <div class="timeline-related">
                                 <div>
-                                  <span>Slitting Output</span>
+                                  <span>${event.relatedProductType || "Slitting Output"}</span>
                                   <strong>${linkedProduct.batch} - ${linkedProduct.name}</strong>
                                 </div>
                                 <button class="text-btn" data-product="${linkedProduct.id}" type="button">View Detail</button>
@@ -800,6 +801,8 @@
                         <strong>${event.place}</strong>
                         <span>${event.time}</span>
                         <p class="muted">${event.note}</p>
+                        ${renderTimelineSourceDetails(event)}
+                        ${renderTimelineRelatedProduct(event)}
                       </div>
                     </div>
                   `,
@@ -809,23 +812,69 @@
           </div>
           <div class="trace-card">
             <div class="section-title"><h3>Material Source</h3></div>
-            <div class="material-list">
-              ${product.materials
-                .map(
-                  (material) => `
-                    <div class="material-item">
-                      <div>
-                        <strong>${material.name}</strong>
-                        <div class="muted">${material.type} - ${material.batch} - ${material.quantity}</div>
-                      </div>
-                    </div>
-                  `,
-                )
-                .join("")}
-            </div>
+            ${renderMaterialSourceTree(product)}
           </div>
         </div>
       </div>
+    `;
+  }
+
+  function renderMaterialSourceTree(product) {
+    return `
+      <div class="material-tree">
+        ${renderMaterialSourceNode(
+          {
+            id: product.id,
+            type: product.type,
+            name: product.name,
+            batch: product.batch,
+            quantity: "Trace target",
+            product,
+          },
+          new Set(),
+        )}
+      </div>
+    `;
+  }
+
+  function renderMaterialSourceNode(source, visited) {
+    const sourceProduct = source.product || productRepository.findById(source.id);
+    const isRawMaterial = !sourceProduct;
+    const nextVisited = new Set(visited);
+
+    if (sourceProduct) {
+      nextVisited.add(sourceProduct.id);
+    }
+
+    const children = sourceProduct
+      ? sourceProduct.materials.filter((material) => !nextVisited.has(material.id))
+      : [];
+
+    const nodeContent = `
+      <div class="material-tree-line">
+        <div>
+          <strong>${source.batch} - ${source.name}</strong>
+          <div class="muted">${getMaterialStageLabel(source, sourceProduct)} - ${source.quantity}</div>
+        </div>
+        ${
+          isRawMaterial
+            ? `<button class="text-btn" data-material="${source.id}" type="button">Source Detail</button>`
+            : `<button class="text-btn" data-product="${sourceProduct.id}" type="button">Detail</button>`
+        }
+      </div>
+    `;
+
+    if (!children.length) {
+      return `<div class="material-tree-node ${isRawMaterial ? "raw-source" : "product-source"}">${nodeContent}</div>`;
+    }
+
+    return `
+      <details class="material-tree-node ${isRawMaterial ? "raw-source" : "product-source"}" open>
+        <summary>${nodeContent}</summary>
+        <div class="material-tree-children">
+          ${children.map((material) => renderMaterialSourceNode(material, nextVisited)).join("")}
+        </div>
+      </details>
     `;
   }
 
@@ -837,6 +886,52 @@
         <button class="ghost-btn" data-report-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""} type="button">Previous</button>
         <span>Page ${currentPage} dari ${totalPages}</span>
         <button class="ghost-btn" data-report-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""} type="button">Next</button>
+      </div>
+    `;
+  }
+
+  function getMaterialStageLabel(source, sourceProduct) {
+    if (!sourceProduct || source.type === "Raw Material") return "Raw Material";
+
+    return getProductStage(sourceProduct).label;
+  }
+
+  function renderTimelineSourceDetails(event) {
+    if (!event.sourceDetails?.length) return "";
+
+    return `
+      <ul class="timeline-source-list">
+        ${event.sourceDetails
+          .map(
+            (source) => `
+              <li>
+                <strong>${source.label}</strong>
+                <span>${source.batch} - ${source.name}</span>
+                ${source.quantity ? `<small>${source.quantity}</small>` : ""}
+                ${source.originLocation ? `<small>From: ${source.originLocation}</small>` : ""}
+                ${source.joinLocation ? `<small>Join Location: ${source.joinLocation}</small>` : ""}
+              </li>
+            `,
+          )
+          .join("")}
+      </ul>
+    `;
+  }
+
+  function renderTimelineRelatedProduct(event) {
+    const linkedProduct = event.relatedProductId
+      ? productRepository.findById(event.relatedProductId)
+      : null;
+
+    if (!linkedProduct) return "";
+
+    return `
+      <div class="timeline-related">
+        <div>
+          <span>${event.relatedProductType || "Related Product"}</span>
+          <strong>${linkedProduct.batch} - ${linkedProduct.name}</strong>
+        </div>
+        <button class="text-btn" data-product="${linkedProduct.id}" type="button">View Detail</button>
       </div>
     `;
   }
