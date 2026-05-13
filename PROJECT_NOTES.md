@@ -21,6 +21,7 @@ Product Intelligence Center is a manufacturing dashboard for reviewing productio
 - `src/data-sources/apiDataSource.js` is the runtime API adapter for future backend integration.
 - `src/repositories/productRepository.js` and `src/repositories/authRepository.js` are the access layer used by UI.
 - Frontend should not connect directly to database.
+- SQLite schema for the planned local database lives in `database/sqlite_schema.sql`; import it into SQLite before seeding data.
 
 ## Mock Data
 
