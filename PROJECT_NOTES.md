@@ -22,6 +22,7 @@ Product Intelligence Center is a manufacturing dashboard for reviewing productio
 - `src/repositories/productRepository.js` and `src/repositories/authRepository.js` are the access layer used by UI.
 - Frontend should not connect directly to database.
 - SQLite schema for the planned local database lives in `database/sqlite_schema.sql`; import it into SQLite before seeding data.
+- Database client dependencies are installed for future backend work: `better-sqlite3` for SQLite and `pg` for PostgreSQL. The current frontend structure still uses the configured data source and has not been switched to a database.
 
 ## Mock Data
 
